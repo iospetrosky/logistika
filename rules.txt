@@ -1,0 +1,19 @@
+Logistika rules ad concepts
+
+Growth of city
+
+City tries to buy the matierials to grow by 100 population
+1000 food
+20 iron
+50 bricks
+50 wood
+
+City tries to buy the materials consumed per day (#turn per day??)
+Cities consumption per turn per 100 population
+100 food
+2 iron
+5 wood
+
+Cities have a level of production for each material.
+Production is PER (game) DAY
+They must buy the missing (or the population decreases)
