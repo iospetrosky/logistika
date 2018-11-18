@@ -60,19 +60,21 @@ $(document).ready(function () {
   </div>
 </div>
 <h1>Test</h1>
+<h4>
 <?php if ($url[0] == "editor"): ?>
-<h4>[ <a href="<?php echo config_item('index_page_url') ; ?>/editor/players">Players</a> ] - 
+    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/players">Players</a> ] - 
     [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/wh_goods">Warehouse goods</a> ] - 
     [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/places">Places</a> ] - 
     [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/prodpoints">Prod. places</a> ] - 
     [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/prod_wf">Prod. workflow</a> ] - 
     [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/equivalent">Equivalents</a> ] - 
     [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/goods">Goods</a> ]
-</h4>
+<?php elseif ($url[0] == "display"): ?>
+    [ <a href="<?php echo config_item('index_page_url') ; ?>/display/majorwarehouses">Major warehouses</a> ]
 <?php else: ?>
 <h4>Main menu</h4>
 <?php endif; ?>
-
+</h4>
 
 
 
