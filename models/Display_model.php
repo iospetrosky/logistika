@@ -11,5 +11,11 @@ class Display_model extends CI_Model {
         $query = $this->db->get('v_major_warehouses_goods');
         return $query->result();
     }
+    
+    public function marketplace() {
+        $query = $this->db->get('v_marketplace');
+        return $query->result();
+    }
+    
 }
     

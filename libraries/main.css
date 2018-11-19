@@ -49,3 +49,44 @@ p {
 .row_edited {
     background-color: red;
 }
+
+.head_display_cell {
+    display: inline-block;
+    background-color: #c3c3d8;
+    color: #e0975c;
+    font-weight: bold;
+    height: 60px;
+    vertical-align: bottom;
+    display: table-cell;
+}
+
+
+
+.menubuttons button {
+    background-color: #4CAF50; /* Green background */
+    border: 1px solid green; /* Green border */
+    color: white; /* White text */
+    padding: 10px 24px; /* Some padding */
+    cursor: pointer; /* Pointer/hand icon */
+    float: left; /* Float the buttons side by side */
+}
+
+/* Clear floats (clearfix hack) */
+.menubuttons:after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.menubuttons .current {
+    background-color: red;
+}
+
+.menubuttons button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.menubuttons button:hover {
+    background-color: #3e8e41;
+}

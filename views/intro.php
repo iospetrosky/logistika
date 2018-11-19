@@ -7,7 +7,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<title>Logistika - config</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="<?php echo config_item('base_url'); ?>logistika/libraries/cookies.js"></script>
+<script src="<?php echo config_item('base_url'); ?>/logistika/libraries/cookies.js"></script>
+<script src="<?php echo config_item('base_url'); ?>/logistika/libraries/utils.js"></script>
 
 <script type="text/javascript">
 var base_url = "<?php echo config_item('index_page_url') ; ?>"
@@ -31,8 +32,9 @@ $(document).ready(function () {
         }
     })
 
-
-    run_local() // must be defined in the subsequent views
+    if(typeof(run_local) == typeof(Function)) {
+        run_local() // must be defined in the subsequent views
+    }
 })
 </script>
 <?php
@@ -60,21 +62,36 @@ $(document).ready(function () {
   </div>
 </div>
 <h1>Test</h1>
-<h4>
-<?php if ($url[0] == "editor"): ?>
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/players">Players</a> ] - 
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/wh_goods">Warehouse goods</a> ] - 
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/places">Places</a> ] - 
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/prodpoints">Prod. places</a> ] - 
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/prod_wf">Prod. workflow</a> ] - 
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/equivalent">Equivalents</a> ] - 
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/editor/goods">Goods</a> ]
-<?php elseif ($url[0] == "display"): ?>
-    [ <a href="<?php echo config_item('index_page_url') ; ?>/display/majorwarehouses">Major warehouses</a> ]
-<?php else: ?>
-<h4>Main menu</h4>
-<?php endif; ?>
-</h4>
+<div class="menubuttons">
+<button onclick="Nav('<?php echo config_item('index_page_url') ; ?>')">Home</button>
+
+<?php 
+    if ($url[0] == "editor"): 
+        $links = array("players" => "Players",
+                       "wh_goods" => "Warehouse goods",
+                       "places" => "Places",
+                       "prodpoints" => "Prod. points",
+                       "prod_wf" => "Prod. workflows",
+                       "equivalent" => "Equivalent",
+                       "goods" => "Goods");
+    elseif ($url[0] == "display"):
+        $links = array("majorwarehouses" => "Major warehouses",
+                       "marketplace" => "Marketplaces" );
+    else:
+        $links = array("editor" => "Editor",
+                       "display" => "Viewer" );
+    endif;
+
+    foreach($links as $link=>$text) {
+        echo "<button ";
+        if (isset($url[1])) if ($url[1] == $link) echo "class=current ";
+        if (isset($url[0])) { $kk = $url[0] . "/";} else { $kk = ""; }
+        echo "onclick=Nav('" . config_item('index_page_url') . "/" . $kk . $link . "')>";
+        echo $text;
+        echo "</button>";
+    }
+?>
+</div>
 
 
 
