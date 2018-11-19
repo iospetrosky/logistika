@@ -21,8 +21,9 @@ class Display extends CI_Controller {
         //$this->load->view('display_form',$data);
     }
 
-    public function marketplace() {
-        $data['list'] = $this->display_model->marketplace(); 
+    public function marketplace($field = false, $value = false) {
+        $data['list'] = $this->display_model->marketplace($field, $value); 
+        //$data['list'] = $this->display_model->marketplace("id_place", "1"); 
         $data['columns'] = array (
                 array("ID", 50),
                 array("ID place", 50),
@@ -44,8 +45,8 @@ class Display extends CI_Controller {
     }
     
     
-    public function majorwarehouses() {
-        $data['list'] = $this->display_model->majorwarehouses(); 
+    public function majorwarehouses($field = false, $value = false) {
+        $data['list'] = $this->display_model->majorwarehouses($field, $value); 
         $data['columns'] = array (
                 array("ID place", 50),
                 array("Place name", 150),

@@ -9,7 +9,12 @@ var ajax_url = "<?php echo $ajax; ?>"
 
 
 function run_local() {
-
+    $(".head_display_cell").click(function(e){
+        var value = prompt("Enter a value to filter this field","")
+        if(value) {
+            Nav("<?php echo $bu . "/" . $url[0] . "/" . $url[1];?>/" + $(this).attr("id") + "/" + value)
+        }
+    })
 
             
 } // run_local    
@@ -21,12 +26,14 @@ function run_local() {
 
 <?php
 if ($list) {
-    //print_r($list); die();
-    
-    
     $inner = "";
-    foreach($columns as $c) {
-        $inner .= div($c[0], array("style" => "width:" . $c[1] . "px", "class" => "head_display_cell"));
+    $k = 0;
+    $keys = array_keys((array)$list[0]);
+    //foreach($columns as $c) { 
+    for($k=0; $k<count($columns); $k++) {
+        $inner .= div($columns[$k][0], array("style" => "width:" . $columns[$k][1] . "px", 
+                                             "class" => "head_display_cell", 
+                                             "id" => $keys[$k]));
     }
     echo div($inner);
     $r = 1; // a row count to create an ID

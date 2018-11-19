@@ -59,8 +59,14 @@ p {
     vertical-align: bottom;
     display: table-cell;
 }
+.head_display_cell:hover {
+    color: green;
+    cursor: pointer;
+}
 
-
+.menubuttons {
+    margin-bottom: 3px;
+}
 
 .menubuttons button {
     background-color: #4CAF50; /* Green background */

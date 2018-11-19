@@ -7,15 +7,21 @@ class Display_model extends CI_Model {
         //$this->load->database(); // loaded by default
     }
 
-    public function majorwarehouses() {
-        $query = $this->db->get('v_major_warehouses_goods');
-        return $query->result();
+    public function majorwarehouses($field = false, $value = false) {
+        return $this->generic_select("v_major_warehouses_goods", $field, $value);
     }
     
-    public function marketplace() {
-        $query = $this->db->get('v_marketplace');
-        return $query->result();
+    public function marketplace($field = false, $value = false) {
+        return $this->generic_select("v_marketplace", $field, $value);
     }
     
+    private function generic_select($table, $field = false, $value = false) {
+        $this->db->select("*")->from($table);
+        if ($field) {
+            $this->db->where($field,$value);
+        }
+        $query = $this->db->get();
+        return $query->result();
+    }
 }
     
