@@ -1,5 +1,5 @@
 <?php
-require_once("../libraries/my_pdo.php");
+require_once("libraries/my_pdo.php");
 require_once("z_local_db.php");
 require_once("z_const.php");
 // Production is PER DAY (game day = 1hr - 4 turns)
