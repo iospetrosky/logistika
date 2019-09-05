@@ -1,5 +1,10 @@
 Logistika rules ad concepts
 
+
+
+
+
+
 Growth of city
 
 City tries to buy the matierials to grow by 100 population

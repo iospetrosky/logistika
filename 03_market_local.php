@@ -100,8 +100,6 @@ class MarketDB extends LocalDB {
         $this->commit();
     }
     
-    
-    
     function get_goods_at_marketplace($id_place) {
         return $this->column("select distinct id_good as P1 from marketplace where id_place = $id_place");
     }
@@ -164,7 +162,7 @@ $db = new MarketDB();
 
 /*
 The major tries to buy the necessary to grow, at a reasonable price and a little surplus
-and the necessary to avoid the downsizeing at ANY price
+and the necessary to avoid the downsizing at ANY price
 */
 
 $goods = $db->get_whouse_goods();
@@ -176,26 +174,24 @@ foreach ($goods as $g) {
     $mkt = new stdClass();
     $mkt->id_place = $g->id_place;
     $mkt->id_player = $g->id_player;
-    $mkt->op_type = 'B';
-    $mkt->op_scope = 'L';
+    $mkt->op_type = 'B'; //buy
+    $mkt->op_scope = 'L'; //Local ?
     $mkt->id_good = $g->id_good;
     
     // place the growth order
-    //if ($g->population > 100) {
-        switch($g->id_good) {
-            case FOOD: $mkt->quantity = ($g->population+100)*4 + 1000 - $g->avail_quantity; break;
-            case IRON: $mkt->quantity = 20 - $g->avail_quantity; break;
-            case WOOD: $mkt->quantity = 50 - $g->avail_quantity; break;
-            case BRICK: $mkt->quantity = 50 - $g->avail_quantity; break;
-            default: $mkt->quantity = 0;
-        }
-        if ($mkt->quantity > 0) {
-            echo "Growth material {$g->gname} for {$g->pname}\n";
-            // else the min production of food is enough
-            $mkt->price = $db->get_default_price($g->id_good, $g->ptype); 
-            $db->insert_order($mkt);
-        }
-    //}
+    switch($g->id_good) {
+        case FOOD: $mkt->quantity = ($g->population+100)*4 + 1000 - $g->avail_quantity; break;
+        case IRON: $mkt->quantity = 20 - $g->avail_quantity; break;
+        case WOOD: $mkt->quantity = 50 - $g->avail_quantity; break;
+        case BRICK: $mkt->quantity = 50 - $g->avail_quantity; break;
+        default: $mkt->quantity = 0;
+    }
+    if ($mkt->quantity > 0) {
+        echo "Growth material {$g->gname} for {$g->pname}\n";
+        // else the min production of food is enough
+        $mkt->price = $db->get_default_price($g->id_good, $g->ptype); 
+        $db->insert_order($mkt);
+    }
     // place the NO starving order
     // are there materials for the next 12 rounds (3 turns)?
     switch($g->id_good) {

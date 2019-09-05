@@ -38,8 +38,34 @@ $(document).ready(function () {
 })
 </script>
 <?php
-    echo link_tag('logistika/libraries/main.css');
-    echo link_tag('logistika/libraries/modal.css');
+echo link_tag('logistika/libraries/main.css');
+echo link_tag('logistika/libraries/modal.css');
+if (strpos(uri_string(),"/map") !== false):
+    //the map view so load the specific CSS
+?>
+<style>
+.map_img {
+    background-image: url('<?php echo base_url("logistika/images/island_map.png"); ?>');
+    width: <?php echo $map_wdt; ?>px;
+    height: <?php echo $map_hgt; ?>px;
+    position: relative;
+}  
+.hexagon {
+    _border: 1px solid black;
+    width: <?php echo $hex_wdt; ?>px;
+    height: <?php echo $hex_hgt; ?>px;
+    position: absolute;
+}
+.hexagon:hover {
+    background-image: url('<?php echo base_url("logistika/images/hexagon_red2.png"); ?>');
+    _background-color: red;
+    cursor: pointer;
+}
+</style>
+<?php
+    //now it's empty
+    //echo link_tag('logistika/libraries/map.css');
+endif;
 ?>
 
 
@@ -76,7 +102,8 @@ $(document).ready(function () {
                        "goods" => "Goods");
     elseif ($url[0] == "display"):
         $links = array("majorwarehouses" => "Major warehouses",
-                       "marketplace" => "Marketplaces" );
+                       "marketplace" => "Marketplaces",
+                       "map" => "Map");
     else:
         $links = array("editor" => "Editor",
                        "display" => "Viewer" );

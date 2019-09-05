@@ -11,14 +11,25 @@ class Display extends CI_Controller {
         $this->load->model('sets_model');
     }
     
-    public function index()
+    public function index($data = false)
     {
         // load all the data needed in the views in variables to be passed as second parameter
         //$data['tile_sets'] = $this->display_model->some_method(); 
 
         $data["url"] = explode("/", $this->uri->uri_string());
         $this->load->view('intro',$data);
-        //$this->load->view('display_form',$data);
+    }
+    
+    public function map() {
+        $data["mapname"] = "demo";
+        $data["hex_wdt"] = 90;
+        $data["hex_hgt"] = 104;
+        $data["map_wdt"] = 630;
+        $data["map_hgt"] = 800;
+        
+        $data["tiles"] = $this->display_model->getmap($data["mapname"]);
+        $this->index($data);
+        $this->load->view('map_view',$data);
     }
 
     public function marketplace($field = false, $value = false) {

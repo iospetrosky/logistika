@@ -19,8 +19,11 @@ class ProductionDB extends LocalDB {
     }
 
     function retrieve_goods($wh,$good,$quantity) {
-        $sql = "update warehouses_goods set quantity = quantity - ? where id_warehouse = ? and id_good = ? and quantity-locked >= ?";
-        if($this->exec_prepared($sql,array($quantity,$wh,$good,$quantity))) {
+        //echo sprintf("%s - %s - %s \n",$wh,$good,$quantity);
+        // prepared statement does not work with the expression quantity-locked
+        $sql = "update warehouses_goods set quantity = quantity - %s where id_warehouse = %s and id_good = %s and quantity-locked >= %s";
+        $sql = sprintf($sql,$quantity,$wh,$good,$quantity);
+        if ($this->exec($sql)) {
             return 1;
         } else {
             return 0;
@@ -50,8 +53,8 @@ $db = new ProductionDB();
 $rows = $db->query("select id_place, pname, id_good, gname, quantity from v_places_production order by id_place ASC");
 $curr = 0; //current place
 $cwh = 0; // current warehouse
+echo "*** DEFAULT PRODUCTION ***\n";
 foreach($rows as $r) {
-    echo sprintf("Processing %s %s %d", $r->pname, $r->gname, $r->quantity) . "\n";
     if ($r->id_place != $curr) {
         //retrieve the warehouse of the major of this place
         $curr = $r->id_place;
@@ -63,38 +66,11 @@ foreach($rows as $r) {
             echo "Switching to warehouse $cwh \n";
         }
     }
+    echo sprintf("Processing %s %s %d", $r->pname, $r->gname, $r->quantity) . "\n";
     $db->store_goods($cwh,$r->id_good,$r->quantity);
 }
 
-// place growth
-// a place grows by 100 when food > 1000 + (population+100) *4
-// that is the place can survive next turn if food does not come or is produced
-$rows = $db->query("select id_place, pname, id_whouse  from v_major_warehouses_goods where avail_quantity > (population+100)*4+1000 and id_good = 1");
-foreach($rows as $r) {
-    echo sprintf("Attempt to grow for place: %s ", $r->pname);
-    $db->beginTransaction();
-    $sql = "update places set population = population + 100 where id = ?";
-    if ($db->exec_prepared($sql,array($r->id_place)) == 1) {
-        $sql = "update warehouses_goods set quantity = quantity - ? where id_warehouse = ? and id_good = ? and quantity >= ?";
-        $c = $db->exec_prepared($sql, array(1000,$r->id_whouse,FOOD,1000)); // 1000 bread(1)
-        $c += $db->exec_prepared($sql, array(20,$r->id_whouse,IRON,20)); // 20 iron(2)
-        $c += $db->exec_prepared($sql, array(50,$r->id_whouse,WOOD,50)); // 50 wood(3)
-        $c += $db->exec_prepared($sql, array(50,$r->id_whouse,BRICK,50)); // 50 brick(5)
-        if ($c == 4) {
-            $db->commit();
-            echo "... success\n";
-        } else {
-            $db->rollback();
-            echo "... failed\n";
-        }
-    } else {
-        // this should NEVER happen actually
-        $db->rollback();
-    }
-}
-
-
-// players production
+echo "*** PLAYER PRODUCTION ***\n";
 $plcs = $db->query("select id, pname, population, ptype from places");
 foreach($plcs as $plc) {
     // randomize the order of production
@@ -129,6 +105,7 @@ foreach($plcs as $plc) {
                 inner join goods g on p.id_good=g.id
                 where g.gtype in ('B','C') and p.id_place = {$plc->id} and active = 1
                 order by g.gtype, rnd_order";
+    //echo $sql . "\n";
     if($items = $db->query($sql)) {
         foreach($items as $it) {
             if ($plc->population >= $it->workers) {
@@ -164,7 +141,40 @@ foreach($plcs as $plc) {
     }
 }
 
-
+echo "*** PLACES GROWTH ***\n";
+// a place grows by 100 when food > 1000 + (population+100) *4
+// that is the place can survive next turn if food does not come or is not produced
+if ($rows = $db->query("select id_place, pname, id_whouse from v_major_warehouses_goods where avail_quantity > (population+100)*4+1000 and id_good = 1")) {
+    foreach($rows as $r) {
+        echo sprintf("Attempt to grow for place: %s ", $r->pname);
+        $db->beginTransaction();
+        $sql = "update places set population = population + 100 where id = ?";
+        if ($db->exec_prepared($sql,array($r->id_place)) == 1) {
+            $sql = "update warehouses_goods set quantity = quantity - ? where id_warehouse = ? and id_good = ? and quantity >= ?";
+            $f = $db->exec_prepared($sql, array(1000,$r->id_whouse,FOOD,1000)); // 1000 food(1)
+            $i = $db->exec_prepared($sql, array(20,$r->id_whouse,IRON,20)); // 20 iron(2)
+            $w = $db->exec_prepared($sql, array(50,$r->id_whouse,WOOD,50)); // 50 wood(3)
+            $b = $db->exec_prepared($sql, array(50,$r->id_whouse,BRICK,50)); // 50 brick(5)
+            if ($f+$i+$w+$b == 4) {
+                $db->commit();
+                echo "... success\n";
+            } else {
+                $db->rollback();
+                echo "... failed. Missing ";
+                echo $f == 0?"Food ":"";
+                echo $i == 0?"Iron ":"";
+                echo $w == 0?"Wood ":"";
+                echo $b == 0?"Bricks ":"";
+                echo "\n";
+            }
+        } else {
+            // this should NEVER happen actually
+            $db->rollback();
+        }
+    }
+} else {
+    echo "No places have the requirements to attempt a growth\n";
+}
 
 
 

@@ -7,6 +7,10 @@ class Display_model extends CI_Model {
         //$this->load->database(); // loaded by default
     }
 
+    public function getmap($mapname) {
+        return $this->generic_select("hex_maps","mname",$mapname);
+    }
+    
     public function majorwarehouses($field = false, $value = false) {
         return $this->generic_select("v_major_warehouses_goods", $field, $value);
     }

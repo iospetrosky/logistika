@@ -23,7 +23,7 @@ foreach($rows as $r) {
     } else {
         echo "Using warehouse $cwh \n";
     }
-    $mult = $r->population / 100; // multiplier for consumption
+    $mult = $r->population / 100; // multiplier for consumption of non-food materials
     // most important there must be food otherwise the population drops
     $food_avail = $db->query_field("select quantity as P1 from warehouses_goods where id_warehouse = $cwh and id_good = " . FOOD );
     if ($food_avail >= $r->population/ROUNDS) {
