@@ -18,9 +18,11 @@ class ProductionDB extends LocalDB {
         return $this->query_field($sql);
     }
 
-    function retrieve_goods($wh,$good,$quantity) {
-        //echo sprintf("%s - %s - %s \n",$wh,$good,$quantity);
-        // prepared statement does not work with the expression quantity-locked
+    function retrieve_goods($player,$place,$good,$quantity) {
+        //retrieve the warehouse where the good is stored
+        $sql = "select id_whouse from v_player_warehouses_goods where id_place = $place and id_player = $player and id_good = $good order by avail_quantity DESC";
+        $wh = $this->query_field($sql,"id_whouse");
+        if(!$wh) return 0;
         $sql = "update warehouses_goods set quantity = quantity - %s where id_warehouse = %s and id_good = %s and quantity-locked >= %s";
         $sql = sprintf($sql,$quantity,$wh,$good,$quantity);
         if ($this->exec($sql)) {
@@ -30,6 +32,18 @@ class ProductionDB extends LocalDB {
         }
     }
     
+    function get_player_warehouse($id_player, $id_place) {
+        //returns the warehouse with more available space of the player/place couple
+        $sql = <<<SQL
+            select w.id,   coalesce(w.capacity - sum(quantity),w.capacity) as free_space
+            from warehouses w
+            left join warehouses_goods wg on w.id = wg.id_warehouse
+            where w.player_id = $id_player and w.place_id = $id_place
+            group by w.id 
+            order by 2 desc
+SQL;
+        return $this->query_field($sql,"id");
+    }
     
     function store_goods($wh,$good,$quantity) {
         $sql = "insert into warehouses_goods (id_warehouse,id_good,quantity) values (?,?,?)";
@@ -86,12 +100,17 @@ foreach($plcs as $plc) {
                 $rt = $db->get_production_rate($pp->id_good, $plc->ptype);
                 $pr = $rt * $pp->plevel;
                 $db->beginTransaction();
-                if ($db->store_goods($pp->id_warehouse,$pp->id_good,$pr)) {
-                    echo "Storage OK of $pr {$pp->gname} for {$pp->fullname} at {$pp->pname}\n";
-                    $db->commit();
+                if($id_warehouse = $db->get_player_warehouse($pp->id_player, $pp->id_place)) {
+                    if ($db->store_goods($id_warehouse,$pp->id_good,$pr)) {
+                        echo "Storage OK of $pr {$pp->gname} for {$pp->fullname} at {$pp->pname}\n";
+                        $db->commit();
+                    } else {
+                        echo "Error storing $pr {$pp->gname} for {$pp->fullname} at {$pp->pname} - WH full!\n";
+                        $db->rollback();
+                    }
                 } else {
-                    echo "Error storing $pr {$pp->gname} for {$pp->fullname} at {$pp->pname} - WH full!\n";
                     $db->rollback();
+                    echo "No storage space found for {$pp->fullname} at {$pp->pname}\n";
                 }
             } else {
                 echo "No more workers\n";
@@ -114,7 +133,7 @@ foreach($plcs as $plc) {
                 $db->beginTransaction();
                 $ok = true;
                 foreach($prods as $pp) {
-                    if ($db->retrieve_goods($pp->id_warehouse,$pp->req_id,$pp->req_quantity * $pp->plevel) != 1) {
+                    if ($db->retrieve_goods($pp->id_player,$pp->id_place,$pp->req_id,$pp->req_quantity * $pp->plevel) != 1) {
                         $db->rollback();
                         $ok = false;
                         echo "Error producing {$pp->gname} for {$pp->fullname} at {$pp->pname} - no materials!\n";
@@ -123,14 +142,19 @@ foreach($plcs as $plc) {
                 }
                 if ($ok) {
                     $pr = $pp->req_quantity * $pp->plevel;
-                    if ($db->store_goods($pp->id_warehouse,$pp->id_good,$pr)) {
-                        echo "Production OK of $pr {$pp->gname} for {$pp->fullname} at {$pp->pname}\n";
-                        $db->commit();
+                    if($id_warehouse = $db->get_player_warehouse($pp->id_player, $pp->id_place)) {
+                        if ($db->store_goods($id_warehouse,$pp->id_good,$pr)) {
+                            echo "Production OK of $pr {$pp->gname} for {$pp->fullname} at {$pp->pname}\n";
+                            $db->commit();
+                        } else {
+                            // this should never happen since I removed materials before
+                            // unless something is bought from the marketplace
+                            echo "Error storing $pr {$pp->gname} for {$pp->fullname} at {$pp->pname} - WH full!\n";
+                            $db->rollback();
+                        }
                     } else {
-                        // this should never happen since I removed materials before
-                        // unless something is bought from the marketplace
-                        echo "Error storing $pr {$pp->gname} for {$pp->fullname} at {$pp->pname} - WH full!\n";
                         $db->rollback();
+                        echo "No storage space found for {$pp->fullname} at {$pp->pname}\n";
                     }
                 }
             } else {
