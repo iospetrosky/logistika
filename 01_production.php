@@ -19,7 +19,7 @@ class ProductionDB extends LocalDB {
     }
 
     function retrieve_goods($player,$place,$good,$quantity) {
-        //retrieve the warehouse where the good is stored
+        //retrieve the warehouse where the good is stored (the biggest amount if stored in more that one point)
         $sql = "select id_whouse from v_player_warehouses_goods where id_place = $place and id_player = $player and id_good = $good order by avail_quantity DESC";
         $wh = $this->query_field($sql,"id_whouse");
         if(!$wh) return 0;
@@ -84,7 +84,7 @@ foreach($rows as $r) {
     $db->store_goods($cwh,$r->id_good,$r->quantity);
 }
 
-echo "*** PLAYER PRODUCTION ***\n";
+echo "*** PLAYER PRODUCTION - Prime materials ***\n";
 $plcs = $db->query("select id, pname, population, ptype from places");
 foreach($plcs as $plc) {
     // randomize the order of production
@@ -118,52 +118,63 @@ foreach($plcs as $plc) {
             }
         }
     }
-    // get the ACTIVE production points in this place 
-    $sql = "select p.id, p.rnd_order, p.id_good, g.gtype, g.workers
-                from productionpoints p
-                inner join goods g on p.id_good=g.id
-                where g.gtype in ('B','C') and p.id_place = {$plc->id} and active = 1
-                order by g.gtype, rnd_order";
-    //echo $sql . "\n";
-    if($items = $db->query($sql)) {
-        foreach($items as $it) {
-            if ($plc->population >= $it->workers) {
-                $plc->population -= $it->workers;
-                $prods = $db->query("select * from v_prodpoints_players where id = {$it->id}");
-                $db->beginTransaction();
-                $ok = true;
-                foreach($prods as $pp) {
-                    if ($db->retrieve_goods($pp->id_player,$pp->id_place,$pp->req_id,$pp->req_quantity * $pp->plevel) != 1) {
-                        $db->rollback();
-                        $ok = false;
-                        echo "Error producing {$pp->gname} for {$pp->fullname} at {$pp->pname} - no materials!\n";
-                        break;
-                    } 
-                }
-                if ($ok) {
-                    $pr = $pp->req_quantity * $pp->plevel;
-                    if($id_warehouse = $db->get_player_warehouse($pp->id_player, $pp->id_place)) {
-                        if ($db->store_goods($id_warehouse,$pp->id_good,$pr)) {
-                            echo "Production OK of $pr {$pp->gname} for {$pp->fullname} at {$pp->pname}\n";
-                            $db->commit();
-                        } else {
-                            // this should never happen since I removed materials before
-                            // unless something is bought from the marketplace
-                            echo "Error storing $pr {$pp->gname} for {$pp->fullname} at {$pp->pname} - WH full!\n";
+}
+
+echo "*** PLAYER PRODUCTION - Products ***\n";
+for($rounds=0; $rounds<2; $rounds++) {
+    echo "Round: " . $rounds . "\n";
+    foreach($plcs as $plc) {
+        $db->exec("update productionpoints set rnd_order = FLOOR(RAND() * 800) + 100 where id_place = {$plc->id}");
+        // get the ACTIVE production points in this place 
+        $sql = "select p.id, p.rnd_order, p.id_good, g.gtype, g.workers
+                    from productionpoints p
+                    inner join goods g on p.id_good=g.id
+                    where g.gtype in ('B','C') and p.id_place = {$plc->id} and active = 1
+                    order by g.gtype, rnd_order";
+        //echo $sql . "\n";
+        if($items = $db->query($sql)) {
+            foreach($items as $it) {
+                if ($plc->population >= $it->workers) {
+                    $plc->population -= $it->workers;
+                    $prods = $db->query("select * from v_prodpoints_players where id = {$it->id}");
+                    $db->beginTransaction();
+                    $ok = true;
+                    //try to retrieve all necessary goods from the storage points
+                    foreach($prods as $pp) {
+                        if ($db->retrieve_goods($pp->id_player,$pp->id_place,$pp->req_id, MIN_QUANTITY * $pp->plevel) != 1) {
                             $db->rollback();
-                        }
-                    } else {
-                        $db->rollback();
-                        echo "No storage space found for {$pp->fullname} at {$pp->pname}\n";
+                            $ok = false;
+                            echo "Error producing {$pp->gname} for {$pp->fullname} at {$pp->pname} - no materials!\n";
+                            break;
+                        } 
                     }
+                    if ($ok) {
+                        $pr = $pp->prod_quantity * $pp->plevel;
+                        if($id_warehouse = $db->get_player_warehouse($pp->id_player, $pp->id_place)) {
+                            if ($db->store_goods($id_warehouse,$pp->id_good,$pr)) {
+                                echo "Production OK of $pr {$pp->gname} for {$pp->fullname} at {$pp->pname}\n";
+                                $db->commit();
+                            } else {
+                                // this should never happen since I removed materials before
+                                // unless something is bought from the marketplace
+                                echo "Error storing $pr {$pp->gname} for {$pp->fullname} at {$pp->pname} - WH full!\n";
+                                $db->rollback();
+                            }
+                        } else {
+                            $db->rollback();
+                            echo "No storage space found for {$pp->fullname} at {$pp->pname}\n";
+                        }
+                    }
+                } else {
+                    echo "No more workers\n";
+                    break;
                 }
-            } else {
-                echo "No more workers\n";
-                break;
             }
         }
     }
-}
+} // rounds of production
+
+
 
 echo "*** PLACES GROWTH ***\n";
 // a place grows by 100 when food > 1000 + (population+100) *4

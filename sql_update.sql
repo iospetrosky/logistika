@@ -24,3 +24,36 @@ create view v_player_warehouses_goods as
            INNER JOIN
            goods o ON g.id_good = o.id
      WHERE y.ptype = 'HU';
+
+ CREATE VIEW v_prodpoints_players AS
+    SELECT pp.id,
+           coalesce(pwf.id_wf, 0) AS id_wf,
+           pp.rnd_order,
+           pp.active,
+           pp.plevel,
+           pp.id_player,
+           p.fullname,
+           pp.id_place,
+           pl.pname,
+           pp.id_good,
+           g.gname,
+           g.gtype,
+           g.workers,
+           coalesce(pwf.req_good, 'undefined') AS req_id,
+           coalesce(g2.gname, '') AS req_good,
+           coalesce(pwf.quantity, 0) AS prod_quantity
+      FROM productionpoints pp
+           INNER JOIN
+           players p ON pp.id_player = p.id
+           INNER JOIN
+           places pl ON pp.id_place = pl.id
+           INNER JOIN
+           goods g ON pp.id_good = g.id
+           LEFT JOIN
+           productionworkflow pwf ON pp.id_good = pwf.id_good
+           LEFT JOIN
+           goods g2 ON pwf.req_good = g2.id
+     WHERE p.ptype = 'HU'
+     ORDER BY g.gtype ASC,
+              pp.rnd_order ASC,
+              pp.id_good ASC;
