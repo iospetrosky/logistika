@@ -57,3 +57,45 @@ create view v_player_warehouses_goods as
      ORDER BY g.gtype ASC,
               pp.rnd_order ASC,
               pp.id_good ASC;
+
+CREATE VIEW v_places_whouse_players AS
+    SELECT p.id AS id_place,
+           p.pname,
+           p.population,
+           w.id AS id_whouse,
+           w.capacity,
+           w.whtype,
+           y.id AS id_player,
+           y.fullname,
+           y.ptype,
+           y.gold,
+           y.diamond
+      FROM places p
+           INNER JOIN
+           warehouses w ON p.id = w.place_id
+           INNER JOIN
+           players y ON w.player_id = y.id;
+
+CREATE VIEW v_player_warehouses_goods AS
+    SELECT p.id AS id_place,
+           p.pname,
+           p.population,
+           p.ptype,
+           w.id AS id_whouse,
+           y.id AS id_player,
+           y.fullname,
+           g.id_good,
+           o.gname,
+           g.quantity - g.locked AS avail_quantity,
+           g.locked,
+           w.whtype
+      FROM places p
+           INNER JOIN
+           warehouses w ON p.id = w.place_id
+           INNER JOIN
+           players y ON w.player_id = y.id
+           INNER JOIN
+           warehouses_goods g ON w.id = g.id_warehouse
+           INNER JOIN
+           goods o ON g.id_good = o.id
+     WHERE y.ptype = 'HU';

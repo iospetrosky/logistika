@@ -10,6 +10,13 @@ class Sets_model extends CI_Model {
         //$this->load->database(); // autoloaded
     }
 
+    public function get_human_players() {
+        $query = $this->db->select('id, fullname')
+                            ->from('players')
+                            ->where('ptype','HU')
+                            ->get();
+        return $query->result();
+    }
     
     public function majors_list() {
         $query = $this->db->select("id, fullname")

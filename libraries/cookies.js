@@ -27,14 +27,3 @@ function preload(arrayOfImages) {
         // (new Image()).src = this;
     });
 }
-
-
-function make_param_list(ar_list) {
-	var l = new Object()
-	for (var s in ar_list) {
-		s = ar_list[s]
-		//alert(s)
-		l[s] = $('#'+s).val()
-	}
-	return l
-}

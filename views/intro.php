@@ -104,9 +104,15 @@ endif;
         $links = array("majorwarehouses" => "Major warehouses",
                        "marketplace" => "Marketplaces",
                        "map" => "Map");
+    elseif ($url[0] == "simulator"):
+        $links = array( "marketplace" => "Marketplace",
+                        "production" => "Production",
+                        "storage" => "Storage"
+                        );
     else:
         $links = array("editor" => "Editor",
-                       "display" => "Viewer" );
+                       "display" => "Viewer",
+                       "simulator" => "Sym" );
     endif;
 
     foreach($links as $link=>$text) {

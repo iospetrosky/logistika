@@ -252,7 +252,7 @@ foreach($places as $place) {
 //transform all equivalents in majors' warehouses
 echo "Cleanups\n";
 
-//$db->exec("delete from marketplace where quantity = 0");
+$db->exec("delete from marketplace where quantity = 0");
 if ($goods = $db->query("select * from v_major_warehouses_goods where id_good in (select id_original from equivalent where id_equiv = " . FOOD . ")")) {
     foreach($goods as $good) {
         echo sprintf("Transforming %s %s to Food for %s\n",$good->avail_quantity,$good->gname,$good->fullname);
@@ -267,38 +267,3 @@ if ($goods = $db->query("select * from v_major_warehouses_goods where id_good in
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

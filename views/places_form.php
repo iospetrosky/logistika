@@ -14,7 +14,7 @@ function run_local() {
         var toks = $(this).attr("ID").split("_")
         if (toks[0] == "SAVE") {
             //submit the form
-            $("#form_" + toks[1]).submit();
+            $("#form_" + toks[1]).submit()
         }
         if (toks[0] == "DEL") {
             //set a dedicated link
