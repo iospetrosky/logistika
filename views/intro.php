@@ -6,7 +6,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 	<meta charset="utf-8">
 	<title>Logistika - config</title>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script-->
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <script src="<?php echo config_item('base_url'); ?>/logistika/libraries/cookies.js"></script>
 <script src="<?php echo config_item('base_url'); ?>/logistika/libraries/utils.js"></script>
 
@@ -40,6 +42,7 @@ $(document).ready(function () {
 <?php
 echo link_tag('logistika/libraries/main.css');
 echo link_tag('logistika/libraries/modal.css');
+echo link_tag('logistika/libraries/popup_form.css');
 if (strpos(uri_string(),"/map") !== false):
     //the map view so load the specific CSS
 ?>
@@ -65,6 +68,17 @@ if (strpos(uri_string(),"/map") !== false):
 <?php
     //now it's empty
     //echo link_tag('logistika/libraries/map.css');
+endif;
+?>
+<?php
+if (strpos(uri_string(),"/storage") !== false):
+?>
+<style>
+.good_source {
+    cursor: grab;
+}
+</style>
+<?php
 endif;
 ?>
 

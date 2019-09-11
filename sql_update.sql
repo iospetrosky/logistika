@@ -99,3 +99,5 @@ CREATE VIEW v_player_warehouses_goods AS
            INNER JOIN
            goods o ON g.id_good = o.id
      WHERE y.ptype = 'HU';
+
+-- market equivalents are no more needed probably

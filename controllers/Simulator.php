@@ -27,15 +27,58 @@ class Simulator extends CI_Controller {
 		$this->load->view('simulator_form',$data);
 	}
     
-    public function storage() {
+    public function storage(/*...$params*/) {
         //manages the storage of the current selected player
+        /*
+        if(sizeof($params) > 0) {
+            //switch($params[0]) {
+                print_r($params);
+            //}
+        }
+        */
+        //finally get the storage and return it
         $data["url"] = explode("/", $this->uri->uri_string());
-        //no params, just get the storage and return it
-        $data["warehouses"] = $this->simulator_model->get_storage_of($this->input->cookie("current_id"));
+        $data["list"] = $this->simulator_model->get_storage_of($this->input->cookie("current_id"));
         $this->load->view('intro',$data);
         $this->load->view('storage_form',$data);
     }
     
+    public function movegoods($amount,$from,$to) {
+        //attention. FROM is the ID in warehouses_goods
+        //           TO is the ID of the warehouse because it may be empty if it's a SHIP for example
+        $user_id = $this->input->cookie("current_id");
+        //get date of $from and $to
+        $goods_from = $this->simulator_model->get_wh_goods($from,'id');
+        $goods_to = $this->simulator_model->get_wh_goods($to,'id_whouse');
+        if($goods_from->id_whouse == $goods_to->id_whouse) {
+            echo "Same warehouse";
+            die();
+        }
+        if(($goods_from->id_player!=$user_id) || ($goods_from->id_player!=$user_id)) {
+            echo "Both warehouses must belong to the same player"; // this should not happen by normal means
+            die();
+        }
+        if($goods_from->avail_quantity < $amount) {
+            //we don't move locked quantities as well
+            echo "Trying to move too many items";
+            die();
+        }
+        if($goods_to->capacity - $goods_to->avail_quantity - $goods_to->locked < $amount) {
+            echo "Not enough space in the destination warehouse";
+            die();
+        }
+        //finally we do the movement
+        if ($this->simulator_model->movegoods($amount, $goods_from, $goods_to)) {
+            echo "OK";
+        } else {
+            echo "An error occurred during actual transfer"; //maybe the data changed in the meanwhile
+        }
+        
+        
+        
+        
+        
+    }
     
     
     
