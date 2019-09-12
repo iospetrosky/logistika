@@ -69,4 +69,11 @@ class Simulator extends CI_Controller {
             die("An error occurred during actual transfer"); //maybe the data changed in the meanwhile
         }
     } // movegoods
+    
+    public function createsellorder($wh_goods_id, $amount, $price) {
+        $user_id = $this->input->cookie("current_id");
+        $ret = $this->simulator_model->create_sell_order($wh_goods_id, $amount, $price, $user_id);
+        echo $ret;
+        
+    }
 }

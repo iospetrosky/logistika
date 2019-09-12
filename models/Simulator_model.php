@@ -63,4 +63,34 @@ class Simulator_model extends CI_Model {
         $this->db->trans_commit();
         return true;
     }
+    public function create_sell_order($wh_goods_id, $amount, $price, $user_id) {
+        $pwg = $this->db->select("*")->from("v_player_warehouses_goods")
+                            ->where("id",$wh_goods_id)
+                            ->get()->result()[0];
+        if(!$pwg) return "Error selecting the item";
+        //cheching conditions
+        if($pwg->id_player != $user_id) return "Player mismatch. Possible cheating attempt!";
+        if($pwg->avail_quantity < $amount) return "Not enough unlocked materials";
+        $order = new stdClass();
+        $order->id_place = $pwg->id_place;
+        $order->id_player = $user_id;
+        $order->op_type = 'S';
+        $order->id_good = $pwg->id_good;
+        $order->quantity = $amount;
+        $order->price = $price;
+        
+        $this->db->trans_begin();
+        $this->db->insert('marketplace',$order);
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return "An error occurred while placing the order";
+        }
+        $this->db->query("update warehouses_goods set locked = locked + $amount where id = $wh_goods_id");
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return "An error occurred while updating the storage data";
+        }
+        $this->db->trans_commit();
+        return "OK";
+    }
 }

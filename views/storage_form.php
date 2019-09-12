@@ -4,7 +4,8 @@ $ajax = $bu . "/simulator/";
 ?>
 <script type='text/javascript'>
 //var base_url = "<?php echo $bu; ?>"
-var ajax_url = "<?php echo $ajax; ?>" 
+var ajax_url = "<?php echo $ajax; ?>";
+var last_id;
 
 function run_local() {
     $(".good_source").draggable({
@@ -36,25 +37,28 @@ function run_local() {
         }
     });
 
-
     $(".act_button").mouseup(function(e) {
         //alert($(this).attr("ID"))
-        var toks = $(this).attr("ID").split("_")
+        var toks = $(this).attr("ID").split("_");
+        last_id = toks[1];
         if (toks[0] == "SELL") {
             //submit the form
             $("#sellForm").css("display","block");
         }
-        if (toks[0] == "DEL") {
-            //set a dedicated link
-            window.location.href = base_url + "/editor/wh_goods/del/" + toks[1]
-        }
     })
-/*
-    $(".editable").change(function(e) {
-        var id = $(this).attr("ID").split("_")[1]
-        $("#line_"+id).addClass("row_edited")
+    $("#btn_place_order").mouseup(function(e) {
+        //create a market order 
+        $.get(base_url + "/simulator/createsellorder/" + last_id + "/" + $("#txt_quantity").val() + "/" + $("#txt_price").val(), function(data){
+            if (data != "OK") { 
+                ShowAlert(data,'Error','',ajax_url + "storage"); 
+            } else {
+                Nav(ajax_url + "storage");
+            }
+        })
     })
-  */          
+    $("#btn_cancel_order").mouseup(function(e) {
+        $("#sellForm").css("display","none");
+    })
 } // run_local    
     
 </script>
@@ -125,16 +129,16 @@ if ($list) {
 
 
 <div class="form-popup" id="sellForm">
-  <form action="/action_page.php" class="form-container">
+  <form action="/action_page.php" class="form-container" autocomplete="off">
     <h3>Order information</h3>
-
+    
     <label for="quantity"><b>Quantity</b></label>
     <input type="text"  name="quantity" id="txt_quantity">
 
     <label for="price"><b>Price x unit</b></label>
     <input type="text"  name="price" id="txt_price">
 
-    <button type="submit" class="btn" id="btn_place_order">Place order</button>
+    <button type="button" class="btn" id="btn_place_order">Place order</button>
     <button type="button" class="btn cancel" id="btn_cancel_order">Cancel</button>
   </form>
 </div>    
