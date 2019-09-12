@@ -1,4 +1,3 @@
-
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -51,36 +50,23 @@ class Simulator extends CI_Controller {
         $goods_from = $this->simulator_model->get_wh_goods($from,'id');
         $goods_to = $this->simulator_model->get_wh_goods($to,'id_whouse');
         if($goods_from->id_whouse == $goods_to->id_whouse) {
-            echo "Same warehouse";
-            die();
+            die("Same warehouse");
         }
         if(($goods_from->id_player!=$user_id) || ($goods_from->id_player!=$user_id)) {
-            echo "Both warehouses must belong to the same player"; // this should not happen by normal means
-            die();
+            die("Both warehouses must belong to the same player");// this should not happen by normal means
         }
         if($goods_from->avail_quantity < $amount) {
             //we don't move locked quantities as well
-            echo "Trying to move too many items";
-            die();
+            die("Trying to move too many items");
         }
         if($goods_to->capacity - $goods_to->avail_quantity - $goods_to->locked < $amount) {
-            echo "Not enough space in the destination warehouse";
-            die();
+            die("Not enough space in the destination warehouse");
         }
         //finally we do the movement
         if ($this->simulator_model->movegoods($amount, $goods_from, $goods_to)) {
-            echo "OK";
+            die("OK");
         } else {
-            echo "An error occurred during actual transfer"; //maybe the data changed in the meanwhile
+            die("An error occurred during actual transfer"); //maybe the data changed in the meanwhile
         }
-        
-        
-        
-        
-        
-    }
-    
-    
-    
+    } // movegoods
 }
-    

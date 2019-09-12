@@ -4,7 +4,7 @@
   position: fixed;
   bottom: 0;
   right: 15px;
-  border: 3px solid #f1f1f1;
+  border: 3px solid grey;
   z-index: 9;
 }
 
@@ -17,7 +17,7 @@
 
 /* Full-width input fields */
 .form-container input[type=text], .form-container input[type=password] {
-  width: 100%;
+  width: 90%;
   padding: 15px;
   margin: 5px 0 22px 0;
   border: 1px solid grey;
@@ -32,7 +32,7 @@
 
 /* Set a style for the submit/login button */
 .form-container .btn {
-  background-color: #4CAF50;
+  background-color: #4CAF60;
   color: white;
   padding: 16px 20px;
   border: none;

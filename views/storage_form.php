@@ -1,4 +1,3 @@
-
 <?php
 $bu = config_item('base_url') . '/' . config_item('index_page');
 $ajax = $bu . "/simulator/";
@@ -26,14 +25,13 @@ function run_local() {
                 var id_from = ui.draggable.find('input').attr("ID").split("_")[2];
                 var id_to = $(this).find('input').val();
                 $.get(base_url + "/simulator/movegoods/" + amount_to_move + "/" + id_from + "/" + id_to, function(data){
-                    if (data != "OK") { ShowAlert(data,'Error','',ajax_url + "storage"); }
+                    if (data != "OK") { 
+                        ShowAlert(data,'Error','',ajax_url + "storage"); 
+                    } else {
+                        Nav(ajax_url + "storage");
+                    }
                 })
-                
             }
-            
-            
-            
-            
             return !event;
         }
     });
