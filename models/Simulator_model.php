@@ -27,6 +27,14 @@ class Simulator_model extends CI_Model {
             return false;
         }
     }
+    
+    public function get_place_name($id_place) {
+        if ($id_place == 0) return "";
+        return $this->db->select("pname")
+                        ->from("places")
+                        ->where("id",$id_place)
+                        ->get()->result()[0]->pname;
+    }
 
     public function get_wh_goods($some_id, $id_of) {
         $query = $this->db->select('id_whouse,id_player,capacity,id_good,avail_quantity,locked')
@@ -35,6 +43,24 @@ class Simulator_model extends CI_Model {
                             ->get();
         return $query->result()[0];
     }
+    
+    public function get_places_whouse_player($player_id) {
+        //returns the markeplaces where the player has a storage
+        return $this->db->select("id_place, pname")->distinct()
+                        ->from("v_places_whouse_players")
+                        ->where("id_player",$player_id)
+                        ->get()->result();
+    }
+    
+    public function get_deals_at($place) {
+        $query = $this->db->select("fullname,op_type,gname,quantity,price,id,id_player")
+                        //->from("v_marketplace")
+                        ->from("v_marketplace_equiv")
+                        ->where("id_place",$place)
+                        ->get();
+        return $query->result();
+    }
+    
     
     public function movegoods($amount,$from,$to) {
         //$from and $to are records collected with get_wh_goods
@@ -63,6 +89,21 @@ class Simulator_model extends CI_Model {
         $this->db->trans_commit();
         return true;
     }
+    
+    public function update_market_price($id,$newprice) {
+        $this->db->trans_begin();
+        $this->db->set("price", $newprice)
+                    ->where("id", $id)
+                    ->update("marketplace");
+        if ($this->db->affected_rows() == 1) {
+            $this->db->trans_commit();
+            return true;
+        } else {
+            $this->db->trans_rollback();
+            return false;
+        }
+    }
+    
     public function create_sell_order($wh_goods_id, $amount, $price, $user_id) {
         $pwg = $this->db->select("*")->from("v_player_warehouses_goods")
                             ->where("id",$wh_goods_id)

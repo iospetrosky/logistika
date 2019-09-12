@@ -26,6 +26,35 @@ class Simulator extends CI_Controller {
 		$this->load->view('simulator_form',$data);
 	}
     
+    public function marketplace($place = 0) {
+        /*
+        This function can be called with or without a place
+        WITHOUT: find the list of potential markets for the player
+        WITH: display the list of deals of the market at this place
+        */
+        $user_id = $this->input->cookie("current_id");
+        $data["url"] = explode("/", $this->uri->uri_string());
+        $data["place"] = $this->simulator_model->get_place_name($place);
+        $data["player"] = $user_id;
+        if ($place == 0) {
+            $data["list"] = $this->simulator_model->get_places_whouse_player($user_id);
+        } else {
+            $data["list"] = $this->simulator_model->get_deals_at($place);
+        }
+        $this->load->view('intro',$data);
+        $this->load->view('market_form',$data);
+    }
+    
+    public function updatemarketprice($id, $newprice) {
+        if ($this->simulator_model->update_market_price($id,$newprice)) {
+            //returns the name of the line to be restored in normal color
+            echo "#line_" . $id;
+        } else {
+            echo "Something bad happened. Reload the page";
+        }
+    }
+    
+    
     public function storage(/*...$params*/) {
         //manages the storage of the current selected player
         /*

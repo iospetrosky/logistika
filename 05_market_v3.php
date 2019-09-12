@@ -28,7 +28,7 @@ class MarketDB extends LocalDB {
         if ($id_good == FOOD) {
             // match all the equivalents of Food
             $sql = "select * from marketplace where op_type='S' and op_scope='L' and quantity>0 and id_place=? and id_good in (select id_original from equivalent where id_equiv = ?) and price<=?";
-            //echo $id_place, "-", $id_good, "-",$price_max, "-";
+            echo " -- " . $id_place, "-", $id_good, "-",$price_max, "-";
             //echo $sql . "\n";
         } else {
             $sql = "select * from marketplace where op_type='S' and op_scope='L' and quantity>0 and id_place=? and id_good=? and price<=?";
