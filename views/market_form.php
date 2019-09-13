@@ -48,6 +48,7 @@ if ($place == "") {
         array("Good", 150, "RO"),
         array("QTY", 60, "RO"), // depends on the owner of the deal
         array("Price", 60, "?"),
+        array("Equivalent", 200, "RO"),
         array("", 100)
     );
     $inner = "";

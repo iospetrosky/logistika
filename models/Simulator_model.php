@@ -53,7 +53,7 @@ class Simulator_model extends CI_Model {
     }
     
     public function get_deals_at($place) {
-        $query = $this->db->select("fullname,op_type,gname,quantity,price,id,id_player")
+        $query = $this->db->select("fullname,op_type,gname,quantity,price,'' as equiv,id,id_good,id_player,id_equiv,equiv_quantity,equiv_price")
                         //->from("v_marketplace")
                         ->from("v_marketplace_equiv")
                         ->where("id_place",$place)

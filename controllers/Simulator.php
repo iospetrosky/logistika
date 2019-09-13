@@ -40,6 +40,21 @@ class Simulator extends CI_Controller {
             $data["list"] = $this->simulator_model->get_places_whouse_player($user_id);
         } else {
             $data["list"] = $this->simulator_model->get_deals_at($place);
+            //now fix the equivalences
+            //print_r($data["list"]); die;
+            foreach($data["list"] as &$entry) {
+                if ($entry->id_good != $entry->id_equiv) {
+                    switch($entry->id_equiv) {
+                        case 1:
+                            $entry->equiv = sprintf("Sold as %s FOOD at %s", $entry->equiv_quantity, $entry->equiv_price);
+                            break;
+                        default:
+                            //really?
+                            $entry->equiv = "This should not happen";
+                            break;
+                    }
+                } 
+            }
         }
         $this->load->view('intro',$data);
         $this->load->view('market_form',$data);
