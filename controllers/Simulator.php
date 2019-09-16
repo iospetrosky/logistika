@@ -27,7 +27,7 @@ class Simulator extends CI_Controller {
 		$this->load->view('simulator_form',$data);
 	}
     
-    public function marketplace($place = 0) {
+    public function marketplace($place_id = 0) {
         /*
         This function can be called with or without a place
         WITHOUT: find the list of potential markets for the player
@@ -35,12 +35,23 @@ class Simulator extends CI_Controller {
         */
         $user_id = $this->input->cookie("current_id");
         $data["url"] = explode("/", $this->uri->uri_string());
-        $data["place"] = $this->simulator_model->get_place_name($place);
+        if ($place_id == 0) {
+            //try to get the cookie
+            $place_id = get_cookie("market_id");
+        } elseif ($place_id == -1) {
+            //delete the cookie
+            $place_id = 0;
+            delete_cookie("market_id");
+        } else {
+            // set the cookie
+            set_cookie("market_id",$place_id,30000);
+        }
+        $data["place"] = $this->simulator_model->get_place_name($place_id);
         $data["player"] = $user_id;
-        if ($place == 0) {
+        if (!$place_id)  { 
             $data["list"] = $this->simulator_model->get_places_whouse_player($user_id);
         } else {
-            $data["list"] = $this->simulator_model->get_deals_at($place);
+            $data["list"] = $this->simulator_model->get_deals_at($place_id);
             //now fix the equivalences
             //print_r($data["list"]); die;
             foreach($data["list"] as &$entry) {

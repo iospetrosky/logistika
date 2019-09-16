@@ -58,7 +58,7 @@ if ($place == "") {
     }
     echo "</UL>";
 } else {
-    echo heading("Market of $place &nbsp;&nbsp;&nbsp;&nbsp;[<a href='" . current_url() . "'>Reload</a>]",3);
+    echo heading("Market of $place &nbsp;&nbsp;&nbsp;&nbsp;[<a href='" . current_url() . "'>Reload</a>] &nbsp;&nbsp;&nbsp;&nbsp;[<a href='{$ajax}/marketplace/-1'>Unset</a>]",3);
     $columns = array (
         array("ID", 80, "RO"),
         array("Merchant", 150, "RO"),
