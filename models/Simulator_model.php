@@ -1,0 +1,171 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Simulator_model extends CI_Model {
+
+    public function __construct()    {
+        //$this->load->database(); // loaded by default
+    }
+    
+    public function get_storage_of($id) {
+        $query = $this->db->select('id, pname,id_whouse,capacity,gname,avail_quantity,locked,whtype')
+                            ->from('v_player_warehouses_goods')
+                            ->where('id_player',$id)
+                            ->order_by('pname ASC')
+                            ->get();
+        return $query->result();
+    }
+    
+    public function get_player_name($id) {
+        if ($id) {
+            $query = $this->db->select('fullname')
+                                ->from('players')
+                                ->where('id',$id)
+                                ->get();
+            return $query->result()[0]->fullname;
+        } else {
+            return false;
+        }
+    }
+    
+    public function get_place_name($id_place) {
+        if ($id_place == 0) return "";
+        return $this->db->select("pname")
+                        ->from("places")
+                        ->where("id",$id_place)
+                        ->get()->result()[0]->pname;
+    }
+
+    public function get_wh_goods($some_id, $id_of) {
+        $query = $this->db->select('id_whouse,id_player,capacity,id_good,avail_quantity,locked')
+                            ->from("v_player_warehouses_goods")
+                            ->where($id_of,$some_id)
+                            ->get();
+        return $query->result()[0];
+    }
+    
+    public function get_places_whouse_player($player_id) {
+        //returns the markeplaces where the player has a storage
+        return $this->db->select("id_place, pname")->distinct()
+                        ->from("v_places_whouse_players")
+                        ->where("id_player",$player_id)
+                        ->get()->result();
+    }
+    
+    public function get_deals_at($place) {
+        $query = $this->db->select("id,fullname,op_type,gname,quantity,price,'' as equiv,id_good,id_player,id_equiv,equiv_quantity,equiv_price")
+                        //->from("v_marketplace")
+                        ->from("v_marketplace_equiv")
+                        ->where("id_place",$place)
+                        ->get();
+        return $query->result();
+    }
+    
+    public function movegoods($amount,$from,$to) {
+        //$from and $to are records collected with get_wh_goods
+        $this->db->trans_begin();
+        $sql = sprintf("update warehouses_goods set quantity = quantity - %s, locked = locked - %s where quantity-locked >= %s and id_warehouse = %s and id_good = %s",
+                            $amount,$amount,$amount,$from->id_whouse,$from->id_good);
+        $this->db->query($sql);
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return false;
+        }
+        $sql = sprintf("update warehouses_goods set quantity = quantity + %s where id_warehouse = %s and id_good = %s",
+                            $amount,$to->id_whouse,$from->id_good);
+        $this->db->query($sql);
+        if ($this->db->affected_rows() != 1) {
+            //try to insert
+            $data = array("id_warehouse"=>$to->id_whouse, "id_good"=>$from->id_good, "quantity"=>$amount);
+            $this->db->insert("warehouses_goods",$data);
+            if ($this->db->affected_rows() != 1) {
+                $this->db->trans_rollback();
+                return false;
+            }
+        }
+        //cleanups ... quantities that reach 0 for some reason
+        $this->db->query("delete from warehouses_goods where quantity = 0");
+        $this->db->trans_commit();
+        return true;
+    }
+    
+    public function cancel_order($id, $user_id) {
+        $this->db->trans_begin();
+        $changed_rows = 0;
+        // unlock the amount of goods
+        $order = $this->db->select('id_good, id_place, quantity')
+                        ->from('marketplace')
+                        ->where('id',$id)
+                        ->get()->result()[0];
+        $good = $this->db->select("id, locked")
+                        ->from("v_player_warehouses_goods")
+                        ->where('id_good',$order->id_good)
+                            ->and_where('id_place',$order->id_place)
+                            ->and_where('id_player',$user_id)
+                            ->and_where('locked >= ' . $order->quantity)
+                        ->order_by("locked ASC")
+                        ->get()->result();
+        if ($good->num_rows > 0) {
+            $good = $good[0];
+            $this->db->set("locked", $good[0]->locked - $order->quantity)
+                        ->where('id',$good[0]->id)
+                        ->update("warehouses_goods");
+            $changed_rows += $this->db->affected_rows();
+        }
+        
+        $this->db->delete('marketplace',array('id'=>$id,'id_player'=>$user_id));
+        $changed_rows += $this->db->affected_rows();
+        if ($changed_rows == 2) {
+            $this->db->trans_commit();
+            return true;
+        } else {
+            $this->db->trans_rollback();
+            return false;
+        }
+    }
+    
+    public function update_market_price($id,$newprice) {
+        $this->db->trans_begin();
+        $this->db->set("price", $newprice)
+                    ->where("id", $id)
+                    ->update("marketplace");
+        if ($this->db->affected_rows() == 1) {
+            $this->db->trans_commit();
+            return true;
+        } else {
+            $this->db->trans_rollback();
+            return false;
+        }
+    }
+    
+    public function create_sell_order($wh_goods_id, $amount, $price, $user_id) {
+        $pwg = $this->db->select("*")->from("v_player_warehouses_goods")
+                            ->where("id",$wh_goods_id)
+                            ->get()->result()[0];
+        if(!$pwg) return "Error selecting the item";
+        //cheching conditions
+        if($pwg->id_player != $user_id) return "Player mismatch. Possible cheating attempt!";
+        if($pwg->avail_quantity < $amount) return "Not enough unlocked materials";
+        $order = new stdClass();
+        $order->id_place = $pwg->id_place;
+        $order->id_player = $user_id;
+        $order->op_type = 'S';
+        $order->id_good = $pwg->id_good;
+        $order->quantity = $amount;
+        $order->price = $price;
+        
+        $this->db->trans_begin();
+        $this->db->insert('marketplace',$order);
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return "An error occurred while placing the order";
+        }
+        $this->db->query("update warehouses_goods set locked = locked + $amount where id = $wh_goods_id");
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return "An error occurred while updating the storage data";
+        }
+        $this->db->trans_commit();
+        return "OK";
+    }
+}
