@@ -15,10 +15,13 @@ function run_local() {
         switch(tok[0]) {
             case "price":
                 $.get(ajax_url + "/updatemarketprice/" + tok[1] + "/" + $(this).val(), function(data){
-                    if (data.substring(0,1) == "#") {
-                        $(data).removeClass("row_edited")
+                    data = JSON.parse(data)
+                    
+                    if (data.retcode == "OK") {
+                        $(data.line).removeClass("row_edited")
+                        $("#equiv_" + data.id).val(data.equiv)
                     } else {
-                        ShowAlert(data,'Error','','')
+                        ShowAlert(data.message,'Error','','')
                     }
                 })
                 break;
@@ -55,7 +58,7 @@ if ($place == "") {
     }
     echo "</UL>";
 } else {
-    echo heading("Market of $place &nbsp;&nbsp;&nbsp;&nbsp;[<a href='" . current_url() . "'>Reload</a>]",3);
+    echo heading("Market of $place &nbsp;&nbsp;&nbsp;&nbsp;[<a href='" . current_url() . "'>Reload</a>] &nbsp;&nbsp;&nbsp;&nbsp;[<a href='{$ajax}/marketplace/-1'>Unset</a>]",3);
     $columns = array (
         array("ID", 80, "RO"),
         array("Merchant", 150, "RO"),
@@ -74,11 +77,6 @@ if ($place == "") {
     
     foreach($list as $item) {
         $c = 0;
-        /*
-        echo form_open("{$bu}/simulator/method/params",
-                        array("ID" => "form_" . $item->id),
-                        array("row_id" => $item->id));
-        */
         $inner = "";
         foreach($item as $f=>$v) {
             //skip all the values beyond the last column
@@ -116,7 +114,6 @@ if ($place == "") {
         }
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
-        //echo form_close();
     } // foreach $item
 }
 ?>

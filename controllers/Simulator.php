@@ -27,7 +27,7 @@ class Simulator extends CI_Controller {
 		$this->load->view('simulator_form',$data);
 	}
     
-    public function marketplace($place = 0) {
+    public function marketplace($place_id = 0) {
         /*
         This function can be called with or without a place
         WITHOUT: find the list of potential markets for the player
@@ -35,12 +35,23 @@ class Simulator extends CI_Controller {
         */
         $user_id = $this->input->cookie("current_id");
         $data["url"] = explode("/", $this->uri->uri_string());
-        $data["place"] = $this->simulator_model->get_place_name($place);
+        if ($place_id == 0) {
+            //try to get the cookie
+            $place_id = get_cookie("market_id");
+        } elseif ($place_id == -1) {
+            //delete the cookie
+            $place_id = 0;
+            delete_cookie("market_id");
+        } else {
+            // set the cookie
+            set_cookie("market_id",$place_id,30000);
+        }
+        $data["place"] = $this->simulator_model->get_place_name($place_id);
         $data["player"] = $user_id;
-        if ($place == 0) {
+        if (!$place_id)  { 
             $data["list"] = $this->simulator_model->get_places_whouse_player($user_id);
         } else {
-            $data["list"] = $this->simulator_model->get_deals_at($place);
+            $data["list"] = $this->simulator_model->get_deals_at($place_id);
             //now fix the equivalences
             //print_r($data["list"]); die;
             foreach($data["list"] as &$entry) {
@@ -71,12 +82,18 @@ class Simulator extends CI_Controller {
     }
     
     public function updatemarketprice($id, $newprice) {
+        $json = new stdClass();
         if ($this->simulator_model->update_market_price($id,$newprice)) {
-            //returns the name of the line to be restored in normal color
-            echo "#line_" . $id;
+            $json->retcode = 'OK';
+            $json->id = $id;
+            $json->line = "#line_" . $id; //returns the name of the line to be restored in normal color
+            $entry = $this->simulator_model->get_marketplace_data($id);
+            $json->equiv = sprintf("Sold as %s FOOD at %s", $entry->equiv_quantity, $entry->equiv_price);
         } else {
-            echo "Something bad happened. Reload the page";
+            $json->retcode = 'X1';
+            $json->message =  "Something bad happened. Reload the page";
         }
+        echo json_encode($json);
     }
     
     
