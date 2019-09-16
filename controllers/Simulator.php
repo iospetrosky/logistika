@@ -7,6 +7,7 @@ class Simulator extends CI_Controller {
     {
         parent::__construct();
         $this->load->helper('html_gen_helper');
+        $this->load->helper('url');
         $this->load->model('simulator_model');
         $this->load->model('sets_model');
     }
@@ -58,6 +59,15 @@ class Simulator extends CI_Controller {
         }
         $this->load->view('intro',$data);
         $this->load->view('market_form',$data);
+    }
+    
+    public function cancelorder($id_order) {
+        $user_id = $this->input->cookie("current_id");
+        if ($this->simulator_model->cancel_order($id_order, $user_id)) {
+            echo "OK";
+        } else {
+            echo "Something weird happened, but the order can't be cancelled";
+        }
     }
     
     public function updatemarketprice($id, $newprice) {

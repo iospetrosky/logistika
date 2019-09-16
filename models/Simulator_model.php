@@ -53,7 +53,7 @@ class Simulator_model extends CI_Model {
     }
     
     public function get_deals_at($place) {
-        $query = $this->db->select("fullname,op_type,gname,quantity,price,'' as equiv,id,id_good,id_player,id_equiv,equiv_quantity,equiv_price")
+        $query = $this->db->select("id,fullname,op_type,gname,quantity,price,'' as equiv,id_good,id_player,id_equiv,equiv_quantity,equiv_price")
                         //->from("v_marketplace")
                         ->from("v_marketplace_equiv")
                         ->where("id_place",$place)
@@ -61,12 +61,11 @@ class Simulator_model extends CI_Model {
         return $query->result();
     }
     
-    
     public function movegoods($amount,$from,$to) {
         //$from and $to are records collected with get_wh_goods
         $this->db->trans_begin();
-        $sql = sprintf("update warehouses_goods set quantity = quantity - %s where quantity-locked >= %s and id_warehouse = %s and id_good = %s",
-                            $amount,$amount,$from->id_whouse,$from->id_good);
+        $sql = sprintf("update warehouses_goods set quantity = quantity - %s, locked = locked - %s where quantity-locked >= %s and id_warehouse = %s and id_good = %s",
+                            $amount,$amount,$amount,$from->id_whouse,$from->id_good);
         $this->db->query($sql);
         if ($this->db->affected_rows() != 1) {
             $this->db->trans_rollback();
@@ -88,6 +87,41 @@ class Simulator_model extends CI_Model {
         $this->db->query("delete from warehouses_goods where quantity = 0");
         $this->db->trans_commit();
         return true;
+    }
+    
+    public function cancel_order($id, $user_id) {
+        $this->db->trans_begin();
+        $changed_rows = 0;
+        // unlock the amount of goods
+        $order = $this->db->select('id_good, id_place, quantity')
+                        ->from('marketplace')
+                        ->where('id',$id)
+                        ->get()->result()[0];
+        $good = $this->db->select("id, locked")
+                        ->from("v_player_warehouses_goods")
+                        ->where('id_good',$order->id_good)
+                            ->and_where('id_place',$order->id_place)
+                            ->and_where('id_player',$user_id)
+                            ->and_where('locked >= ' . $order->quantity)
+                        ->order_by("locked ASC")
+                        ->get()->result();
+        if ($good->num_rows > 0) {
+            $good = $good[0];
+            $this->db->set("locked", $good[0]->locked - $order->quantity)
+                        ->where('id',$good[0]->id)
+                        ->update("warehouses_goods");
+            $changed_rows += $this->db->affected_rows();
+        }
+        
+        $this->db->delete('marketplace',array('id'=>$id,'id_player'=>$user_id));
+        $changed_rows += $this->db->affected_rows();
+        if ($changed_rows == 2) {
+            $this->db->trans_commit();
+            return true;
+        } else {
+            $this->db->trans_rollback();
+            return false;
+        }
     }
     
     public function update_market_price($id,$newprice) {

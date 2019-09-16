@@ -25,19 +25,20 @@ class MarketDB extends LocalDB {
     }
     
     function get_matching_sell_orders($id_place, $id_good, $price_max) {
-        if ($id_good == FOOD) {
+        echo " -- Place: " . $id_place, "  Good: ", $id_good, " Price: ",$price_max, "\n";
+        //if ($id_good == FOOD) {
             // match all the equivalents of Food
-            $sql = "select * from marketplace where op_type='S' and op_scope='L' and quantity>0 and id_place=? and id_good in (select id_original from equivalent where id_equiv = ?) and price<=?";
-            echo " -- " . $id_place, "-", $id_good, "-",$price_max, "-";
-            //echo $sql . "\n";
-        } else {
-            $sql = "select * from marketplace where op_type='S' and op_scope='L' and quantity>0 and id_place=? and id_good=? and price<=?";
-        }
+            $sql = "select * from v_marketplace_equiv where op_type='S' and op_scope='L' and equiv_quantity>0 and id_place=%s and id_good in (select id_original from equivalent where id_equiv = %s) and equiv_price<=%s";
+        //} else {
+        //    $sql = "select * from marketplace where op_type='S' and op_scope='L' and quantity>0 and id_place=%s and id_good=%s and price<=%s";
+        //}
         $sql = $sql . " order by price ASC";
-        return $this->query_prepared($sql,array($id_place,$id_good,$price_max));
+        //echo sprintf($sql, $id_place,$id_good,floatval($price_max)) . "\n";
+        return $this->query(sprintf($sql, $id_place,$id_good,floatval($price_max)));
     }
     
     function move_goods($location, $from, $to, $what, $quantity) {
+        echo " -- Moving $quantity of $what from $from to $to \n";
 //the seller (from) must have the quantity of good locked in one of the warehouses of the current location
 $sql_1 = <<<SQL
     select wg.id as id, wg.id_good,wg.quantity,wg.locked
@@ -88,6 +89,7 @@ SQL;
     }
     
     function make_payment($from, $to, $gold) {
+        echo " -- Payment of $gold from $from to $to \n";
         $sql_1 = "update players set gold = gold + ? where id = ?";
         $sql_2 = "update players set gold = gold - ? where id = ? and gold >= ?";
         $s1 = $this->exec_prepared($sql_1,array($gold,$to));
@@ -168,13 +170,13 @@ $db = new MarketDB();
 The major places a buy request for the items needed for a growth.
 A growth is needed when the people used in production is almost at the limit
 */
-echo "*** GROWTH ORDERS ***\n";
 $places = $db->query("select * from places");
+
+echo "*** GROWTH ORDERS ***\n";
 foreach($places as $place) {
     $db->exec("delete from marketplace where id_place = {$place->id} and id_player = {$place->major}");
     
     $workers = $db->get_workers_place($place->id);
-    //echo $db->last_sql;
     echo sprintf("%s population %d workers %d\n", $place->pname, $place->population, $workers);
     if ($workers > $place->population-20) {
         $db->place_growth_buy_orders($place);
@@ -197,7 +199,8 @@ foreach($places as $place) {
                 foreach($sells as $sell) {
                     echo " Sell: " . $sell->id;
                     $db->beginTransaction();
-                    if ($buy->quantity > $sell->quantity) {
+                    if ($buy->quantity > $sell->equiv_quantity) {
+                        //equiv quantity and price are identical for products that don't have equivalents
                         //move the corresponding amount of money between buyer and seller
                         if ($db->make_payment($buy->id_player, $sell->id_player, $sell->quantity * $sell->price)===false) {
                             //no money?
@@ -209,8 +212,8 @@ foreach($places as $place) {
                                 //update also the orders
                                 $buy->quantity -= $sell->quantity;
                                 $sell->quantity = 0;
-                                $db->update_object("marketplace",$buy);
-                                $db->update_object("marketplace",$sell);
+                                $db->exec(sprintf("update marketplace set quantity=quantity-%s where id=%s",$buy->quantity,$buy->id));
+                                $db->exec(sprintf("update marketplace set quantity=0 where id=%s",$sell->id));
                                 $db->commit();
                                 echo " closed partial buy\n";
                             } else {
@@ -220,14 +223,24 @@ foreach($places as $place) {
                         }
                         //since buy has still a quantity, we go on with the sells
                     } else {
-                        if ($db->make_payment($buy->id_player, $sell->id_player, $buy->quantity * $sell->price)===false) {
+                        $real_quantity = $buy->quantity;
+                        $real_price = $sell->price;
+                        if($sell->id_good != $sell->id_equiv) {
+                            //the quantity actually moved must be converted in case of equivalences
+                            $mult = $sell->equiv_quantity / $sell->quantity; //I avoid getting it from the DB, I just invert the formula
+                            $real_quantity = ceil($buy->quantity / $mult); //round UP to grant at least 1 buy
+                            $real_price = $real_quantity * $sell->price;
+                        }
+                        
+                        
+                        if ($db->make_payment($buy->id_player, $sell->id_player, $real_price)===false) {
                             //no money?
                             $db->rollback();
                             echo " failed: no money\n";
                         } else {
-                            if ($db->move_goods($place->id, $sell->id_player, $buy->id_player, $sell->id_good, $buy->quantity)) {
+                            if ($db->move_goods($place->id, $sell->id_player, $buy->id_player, $sell->id_good, $real_quantity)) {
                                 //update also the orders
-                                $sell->quantity -= $buy->quantity;
+                                $sell->quantity -= $real_quantity;
                                 $buy->quantity = 0;
                                 $db->update_object("marketplace",$sell);
                                 $db->update_object("marketplace",$buy);
@@ -251,8 +264,9 @@ foreach($places as $place) {
 //remove all orders with 0 quantity
 //transform all equivalents in majors' warehouses
 echo "Cleanups\n";
-
 $db->exec("delete from marketplace where quantity = 0");
+$db->exec("delete from warehouses_goods where quantity = 0 and locked = 0"); 
+
 if ($goods = $db->query("select * from v_major_warehouses_goods where id_good in (select id_original from equivalent where id_equiv = " . FOOD . ")")) {
     foreach($goods as $good) {
         echo sprintf("Transforming %s %s to Food for %s\n",$good->avail_quantity,$good->gname,$good->fullname);

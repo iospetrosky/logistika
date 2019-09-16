@@ -24,6 +24,20 @@ function run_local() {
                 break;
         }
     })
+    
+    $(".act_button").mouseup(function(e) {
+        //alert($(this).attr("ID"))
+        var toks = $(this).attr("ID").split("_")
+        if (toks[0] == "CANCEL") {
+            $.get(ajax_url + "/cancelorder/" + toks[1], function(data){
+                if (data.substring(0,1) == "OK") {
+                    Nav("<?php echo current_url(); ?>");
+                } else {
+                    ShowAlert(data,'Error','','<?php echo current_url(); ?>')
+                }
+            })
+        }
+    })
 
 } // run_local    
     
@@ -41,8 +55,9 @@ if ($place == "") {
     }
     echo "</UL>";
 } else {
-    echo heading("Market of $place",3);
+    echo heading("Market of $place &nbsp;&nbsp;&nbsp;&nbsp;[<a href='" . current_url() . "'>Reload</a>]",3);
     $columns = array (
+        array("ID", 80, "RO"),
         array("Merchant", 150, "RO"),
         array("OP", 50, "RO"),
         array("Good", 150, "RO"),
@@ -94,13 +109,15 @@ if ($place == "") {
             $c++;
             if(!isset($columns[$c+1])) break; // +1 because the last is the "" 
         }
-        
-        //$but= button("Sell", array("ID" => "SELL_" . $item->id, "class" => "act_button"));
-        $but = "";
+        if ($item->id_player == $player) {
+            $but = button("Cancel", array("ID" => "CANCEL_" . $item->id, "class" => "act_button"));
+        } else {
+            $but = "";
+        }
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
         //echo form_close();
-    }
+    } // foreach $item
 }
 ?>
 
