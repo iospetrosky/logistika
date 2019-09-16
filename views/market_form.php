@@ -74,11 +74,6 @@ if ($place == "") {
     
     foreach($list as $item) {
         $c = 0;
-        /*
-        echo form_open("{$bu}/simulator/method/params",
-                        array("ID" => "form_" . $item->id),
-                        array("row_id" => $item->id));
-        */
         $inner = "";
         foreach($item as $f=>$v) {
             //skip all the values beyond the last column
@@ -116,7 +111,6 @@ if ($place == "") {
         }
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
-        //echo form_close();
     } // foreach $item
 }
 ?>
