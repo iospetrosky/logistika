@@ -61,6 +61,13 @@ class Simulator_model extends CI_Model {
         return $query->result();
     }
     
+    public function get_marketplace_data($id) {
+        return $this->db->query("select * from v_marketplace_equiv where id = $id limit 1")
+                        ->result()[0];
+    }
+    
+    
+    
     public function movegoods($amount,$from,$to) {
         //$from and $to are records collected with get_wh_goods
         $this->db->trans_begin();

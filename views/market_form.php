@@ -15,10 +15,13 @@ function run_local() {
         switch(tok[0]) {
             case "price":
                 $.get(ajax_url + "/updatemarketprice/" + tok[1] + "/" + $(this).val(), function(data){
-                    if (data.substring(0,1) == "#") {
-                        $(data).removeClass("row_edited")
+                    data = JSON.parse(data)
+                    
+                    if (data.retcode == "OK") {
+                        $(data.line).removeClass("row_edited")
+                        $("#equiv_" + data.id).val(data.equiv)
                     } else {
-                        ShowAlert(data,'Error','','')
+                        ShowAlert(data.message,'Error','','')
                     }
                 })
                 break;

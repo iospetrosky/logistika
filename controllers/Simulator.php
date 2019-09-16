@@ -71,12 +71,18 @@ class Simulator extends CI_Controller {
     }
     
     public function updatemarketprice($id, $newprice) {
+        $json = new stdClass();
         if ($this->simulator_model->update_market_price($id,$newprice)) {
-            //returns the name of the line to be restored in normal color
-            echo "#line_" . $id;
+            $json->retcode = 'OK';
+            $json->id = $id;
+            $json->line = "#line_" . $id; //returns the name of the line to be restored in normal color
+            $entry = $this->simulator_model->get_marketplace_data($id);
+            $json->equiv = sprintf("Sold as %s FOOD at %s", $entry->equiv_quantity, $entry->equiv_price);
         } else {
-            echo "Something bad happened. Reload the page";
+            $json->retcode = 'X1';
+            $json->message =  "Something bad happened. Reload the page";
         }
+        echo json_encode($json);
     }
     
     
