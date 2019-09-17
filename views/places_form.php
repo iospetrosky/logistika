@@ -44,8 +44,7 @@ if ($list) {
         array("Place name", 200),
         array("Major", 150),
         array("Population", 90),
-        array("Map X", 90),
-        array("Map Y", 90),
+        array("Hex on map", 90),
         array("Terrain", 90),
         array("", 100)
     );

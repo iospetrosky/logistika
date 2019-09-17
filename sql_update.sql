@@ -100,4 +100,16 @@ CREATE VIEW v_player_warehouses_goods AS
            goods o ON g.id_good = o.id
      WHERE y.ptype = 'HU';
 
--- market equivalents are no more needed probably
+-- market equivalents keep only v_marketplace_equiv AND drop the other
+create table traderoutes (
+    id       INTEGER      PRIMARY KEY AUTOINCREMENT,
+    hexlength int default 0,
+    starthex int default 0,
+    endhex int default 0,
+    hexcost int default 0,
+    description varchar(200),
+    traveltype varchar(20) default 'ROAD'
+);
+
+in table places drop columns mapx and mapy and replace with hexmap varchar(10)
+

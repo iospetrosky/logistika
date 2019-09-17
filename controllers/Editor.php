@@ -40,6 +40,27 @@ class Editor extends CI_Controller {
         $this->index();
         $this->load->view('players_form',$data);
     }
+    
+    public function traderoutes($action = false, $id = false)
+    {
+        switch($action) {
+            case 'save':
+                $this->editor_model->save_traderoute($this->input->post(NULL,false));
+                break;
+            case 'new':
+                $this->editor_model->new_traderoute();
+                break;
+            case 'del':
+                $this->editor_model->delete_traderoute($id);
+                break;
+        }
+        //print_r($this->players_model->players_list());
+        $data['list'] = $this->sets_model->traderoutes_list(); 
+        $this->index();
+        $this->load->view('traderoutes_form',$data);
+    }
+    
+    
 
     public function goods($action = false, $id = false)
     {   

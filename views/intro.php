@@ -113,7 +113,8 @@ endif;
                        "prodpoints" => "Prod. points",
                        "prod_wf" => "Prod. workflows",
                        "equivalent" => "Equivalent",
-                       "goods" => "Goods");
+                       "goods" => "Goods",
+                       "traderoutes" => "Trade routes");
     elseif ($url[0] == "display"):
         $links = array("majorwarehouses" => "Major warehouses",
                        "marketplace" => "Marketplaces",

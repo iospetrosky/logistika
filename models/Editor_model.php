@@ -23,6 +23,17 @@ class Editor_model extends CI_Model {
         return $this->db->query($sql)->result();
     }  
     //************************************************************************
+    public function save_traderoute($data) {
+        $this->save_data("traderoutes",$data);
+    }
+    public function new_traderoute() {
+        $this->new_data("traderoutes","description","New route");
+    }
+    public function delete_traderoute($id) {
+        $this->delete_data("traderoutes", $id);
+    }
+
+    //************************************************************************
     public function save_whgoods($data) {
         $this->save_data("warehouses_goods",$data);
     }
