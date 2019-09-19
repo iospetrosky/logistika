@@ -45,6 +45,7 @@ echo link_tag('logistika/libraries/modal.css');
 echo link_tag('logistika/libraries/popup_form.css');
 if (strpos(uri_string(),"/map") !== false):
     //the map view so load the specific CSS
+    echo link_tag('logistika/libraries/map.css');
 ?>
 <style>
 .map_img {
@@ -64,6 +65,10 @@ if (strpos(uri_string(),"/map") !== false):
     _background-color: red;
     cursor: pointer;
 }
+.inpath {
+    background-image: url('<?php echo base_url("logistika/images/hexagon_green2.png"); ?>');
+}
+
 </style>
 <?php
     //now it's empty
@@ -106,6 +111,7 @@ endif;
 <button onclick="Nav('<?php echo config_item('index_page_url') ; ?>')">Home</button>
 
 <?php 
+    //the index of the array is the name of a function in the corresponding controller
     if ($url[0] == "editor"): 
         $links = array("players" => "Players",
                        "wh_goods" => "Warehouse goods",
@@ -121,8 +127,8 @@ endif;
                        "map" => "Map");
     elseif ($url[0] == "simulator"):
         $links = array( "marketplace" => "Marketplace",
-                        "production" => "Production",
-                        "storage" => "Storage"
+                        "storage" => "Storage",
+                        "fleet" => "Fleet manager"
                         );
     else:
         $links = array("editor" => "Editor",

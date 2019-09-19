@@ -20,7 +20,7 @@ class Display extends CI_Controller {
         $this->load->view('intro',$data);
     }
     
-    public function map() {
+    public function map($action = '', $id = 0) {
         $data["mapname"] = "demo";
         $data["hex_wdt"] = 90;
         $data["hex_hgt"] = 104;
@@ -28,6 +28,14 @@ class Display extends CI_Controller {
         $data["map_hgt"] = 800;
         
         $data["tiles"] = $this->display_model->getmap($data["mapname"]);
+        $data['action'] = $action;
+        switch($action) {
+            case 'draw':
+                $data['routepath'] = $this->display_model->get_routepath($id);
+                $data['path_id'] = $id;
+                break;
+
+        }
         $this->index($data);
         $this->load->view('map_view',$data);
     }
@@ -74,4 +82,34 @@ class Display extends CI_Controller {
         $this->index();
         $this->load->view('display_form',$data);
     }
+
+    // these are actually NOT display functions
+    public function add_tile($id_route, $token) {
+        //adds the token in the specified path 
+        $res = $this->display_model->add_tile_to_path($id_route, $token);
+        echo $res;
+    }
+    
+    public function del_tile($id_tile) {
+        //removes the tile from the path
+        $this->display_model->del_tile_from_path($id_tile);
+    }
+    
+    public function update_sequence($id_tile, $newseq)     {
+        // changes the sequence of a tile
+        $json = new stdClass();
+        if ($this->display_model->update_sequence($id_tile, $newseq)) {
+            $json->retcode = 'OK';
+            $json->id = $id_tile;
+            $json->line = "#line_" . $id_tile; //returns the name of the line to be restored in normal color
+        } else {
+            $json->retcode = 'X1';
+            $json->message =  "Something bad happened. Reload the page";
+        }
+        echo json_encode($json);
+    }
+    
+    
+    
+    
 }

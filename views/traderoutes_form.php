@@ -24,6 +24,10 @@ function run_local() {
             //set a dedicated link
             window.location.href = base_url + "/editor/traderoutes/new"
         }
+        if (toks[0] == "DRAW") {
+            //set a dedicated link
+            window.location.href = base_url + "/display/map/draw/" + toks[1]
+        }
     })
 
     $(".editable").change(function(e) {
@@ -46,7 +50,7 @@ $columns = array (
     array("Hex len", 90),
     array("Hex cost", 90),
     array("Travel type", 90),
-    array("", 100)
+    array("", 150)
 );
 $inner = "";
 foreach($columns as $c) {
@@ -81,6 +85,7 @@ if ($list) {
         }
         $but = button("save", array("ID" => "SAVE_" . $item->id, "class" => "act_button"));
         $but.= button("del", array("ID" => "DEL_" . $item->id, "class" => "act_button"));
+        $but.= button("draw", array("ID" => "DRAW_" . $item->id, "class" => "act_button"));
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
         echo form_close();

@@ -113,3 +113,14 @@ create table traderoutes (
 
 in table places drop columns mapx and mapy and replace with hexmap varchar(10)
 
+
+create table routespaths (
+    id       INTEGER      PRIMARY KEY AUTOINCREMENT,
+    id_route int not null,
+    pathsequence int default 0,
+    mapname varchar(40) not null,
+    map_tile varchar(20) not null
+);
+
+create unique index rpt_routeseq on routespaths(id_route,pathsequence);
+
