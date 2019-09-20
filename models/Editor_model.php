@@ -31,6 +31,7 @@ class Editor_model extends CI_Model {
     }
     public function delete_traderoute($id) {
         $this->delete_data("traderoutes", $id);
+        $this->delete_data("routespaths", $id, "id_route");
     }
 
     //************************************************************************

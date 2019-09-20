@@ -23,7 +23,6 @@ class Display_model extends CI_Model {
         $this->db->trans_begin();
         $path = new stdClass;
         $path->id_route = $route_id;
-        $path->mapname = 'demo';
         $path->pathsequence = 1;
         $path->map_tile = $tiles->starthex;
         $this->db->insert('routespaths',$path);
