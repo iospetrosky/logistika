@@ -42,8 +42,12 @@ function run_local() {
         var toks = $(this).attr("ID").split("_");
         last_id = toks[1];
         if (toks[0] == "SELL") {
-            //submit the form
+            //display the form
             $("#sellForm").css("display","block");
+        }
+        if (toks[0] == "TRAVEL") {
+            //display the form
+            $("#travelForm").css("display","block");
         }
     })
     $("#btn_place_order").mouseup(function(e) {
@@ -58,6 +62,9 @@ function run_local() {
     })
     $("#btn_cancel_order").mouseup(function(e) {
         $("#sellForm").css("display","none");
+    })
+    $("#btn_cancel_travel").mouseup(function(e) {
+        $("#travelForm").css("display","none");
     })
 } // run_local    
     
@@ -120,6 +127,9 @@ if ($list) {
         }
         
         $but= button("Sell", array("ID" => "SELL_" . $item->id, "class" => "act_button"));
+        if ($item->whtype != 'STATIC') {
+            $but .= button("Travel", array("ID" => "TRAVEL_" . $item->id, "class" => "act_button"));
+        }
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
         //echo form_close();
@@ -127,9 +137,10 @@ if ($list) {
 }
 ?>
 
+THIS SHOULD BE FILTERED BY MARKETPLACE OR CHECK IF GOODS ARE PASSED FROM A PLACE TO ANOTHER
 
 <div class="form-popup" id="sellForm">
-  <form action="/action_page.php" class="form-container" autocomplete="off">
+  <form class="form-container" autocomplete="off">
     <h3>Order information</h3>
     
     <label for="quantity"><b>Quantity</b></label>
@@ -143,6 +154,19 @@ if ($list) {
   </form>
 </div>    
     
+<div class="form-popup" id="travelForm">
+  <form class="form-container" autocomplete="off">
+    <h3>Travel setup</h3>
+    
+    <label for="route"><b>Travel route</b></label><br/>
+    <?php
+        echo form_dropdown("route",$routes,"id = route_id");
+    ?>
+
+    <button type="button" class="btn" id="btn_start_travel">Departure</button>
+    <button type="button" class="btn cancel" id="btn_cancel_travel">Cancel</button>
+  </form>
+</div>    
     
     
 </body>

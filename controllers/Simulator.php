@@ -138,6 +138,14 @@ class Simulator extends CI_Controller {
         //finally get the storage and return it
         $data["url"] = explode("/", $this->uri->uri_string());
         $data["list"] = $this->simulator_model->get_storage_of($this->input->cookie("current_id"));
+        $routes = $this->simulator_model->get_available_routes($this->input->cookie("market_id"));
+        if($routes) {
+            $data["routes"] = array();
+            $x = 0;
+            foreach($routes as $rt) {
+                $data["routes"][$rt->route_id] = $rt->description;
+            }
+        }
         $this->load->view('intro',$data);
         $this->load->view('storage_form',$data);
     }

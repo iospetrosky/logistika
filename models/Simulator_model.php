@@ -68,6 +68,16 @@ class Simulator_model extends CI_Model {
         return $query->result();
     }
     
+    public function get_available_routes($id_place) {
+        //get the hexagon of the place
+        $hex = $this->db->select("hexmap")->from("places")
+                        ->where("id",$id_place)->get()->result()[0]->hexmap;
+        //get the possible routes from this hex
+        $routes = $this->db->query("select id as route_id, description from traderoutes where starthex = '$hex' UNION " . 
+                                   "select id * -1 as route_id, description from traderoutes where endhex = '$hex'")->result();
+        return $routes;
+    }
+    
     public function get_marketplace_data($id) {
         return $this->db->query("select * from v_marketplace_equiv where id = $id limit 1")
                         ->result()[0];
