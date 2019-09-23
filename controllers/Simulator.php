@@ -27,6 +27,35 @@ class Simulator extends CI_Controller {
 		$this->load->view('simulator_form',$data);
 	}
     
+    public function fleet() {
+        $user_id = $this->input->cookie("current_id");
+        $data["url"] = explode("/", $this->uri->uri_string());
+        $data["player"] = $user_id;
+        
+        $data["list"] = $this->simulator_model->get_fleet_info($user_id);
+
+        $this->load->view('intro',$data);
+        $this->load->view('fleet_form',$data);
+    }
+
+    public function cancelroute($id_route) {
+        $res = $this->simulator_model->cancel_route($id_route);
+        echo "OK"; // manage errors also in the function below
+    }
+    
+    public function createtransport() {
+        $user_id = $this->input->cookie("current_id");
+        $place_id = $this->input->cookie("market_id");
+        //the rest in the POST
+        $res = $this->simulator_model->create_transport($this->input->cookie("current_id"),
+                                           $this->input->cookie("market_id"), 
+                                           $this->input->post_get("capacity"),
+                                           $this->input->post_get("whtype"),
+                                           $this->input->post_get("mov_points")
+                                           );
+        echo "OK";
+    }
+    
     public function marketplace($place_id = 0) {
         /*
         This function can be called with or without a place

@@ -6,6 +6,13 @@ class Simulator_model extends CI_Model {
     public function __construct()    {
         //$this->load->database(); // loaded by default
     }
+    public function get_fleet_info($user_id) {
+        $query = $this->db->select("id,whtype,description,traveltype,mov_points,curr_points,hexmap,current_location,is_landed")
+                            ->from("v_transports_locations")
+                            ->where("player_id",$user_id)
+                            ->get();
+        return $query->result();
+    }
     
     public function get_storage_of($id) {
         $query = $this->db->select('id, pname,id_whouse,capacity,gname,avail_quantity,locked,whtype')
@@ -66,8 +73,35 @@ class Simulator_model extends CI_Model {
                         ->result()[0];
     }
     
+    public function create_transport($player_id, $place_id, $capacity, $whtype, $mov_points) {
+        $wh = new stdClass;
+        $tm = new stdClass;
+        
+        $wh->player_id = $player_id;
+        $wh->place_id = $place_id;
+        $wh->capacity = $capacity;
+        $wh->whtype = $whtype;
+        
+        $this->db->trans_begin();
+        $this->db->insert("warehouses",$wh);
+        $tm->id = $this->db->insert_id();
+        
+        $tm->mov_points = $mov_points;
+        $tm->hexmap = $this->db->select("hexmap")->from("places")
+                            ->where("id",$place_id)->get()->result()[0]->hexmap;
+        $tm->route_id = 0;
+        $this->db->insert("transport_movements",$tm);
+        $this->db->trans_commit();
+        return true;
+    }
     
-    
+    public function cancel_route($id_route) {
+        $this->db->set("route_id",0)
+                    ->where("id", $id_route)
+                    ->update("transport_movements");
+        return true;
+    }        
+
     public function movegoods($amount,$from,$to) {
         //$from and $to are records collected with get_wh_goods
         $this->db->trans_begin();
