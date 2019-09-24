@@ -60,6 +60,16 @@ function run_local() {
             }
         })
     })
+    $("#btn_start_travel").mouseup(function(e) {
+        //create a market order 
+        $.get(base_url + "/simulator/begintravel/" + last_id + "/" + $("#txt_quantity").val() + "/" + $("#txt_price").val(), function(data){
+            if (data != "OK") { 
+                ShowAlert(data,'Error','',ajax_url + "storage"); 
+            } else {
+                Nav(ajax_url + "storage");
+            }
+        })
+    })
     $("#btn_cancel_order").mouseup(function(e) {
         $("#sellForm").css("display","none");
     })
@@ -72,6 +82,10 @@ function run_local() {
 
 
 <?php 
+if ($place != "") {
+    echo heading("You are in $place",3);
+}
+
 if ($list) {
     $columns = array (
         array("ID", 50, "RO"),
@@ -127,7 +141,7 @@ if ($list) {
         }
         
         $but= button("Sell", array("ID" => "SELL_" . $item->id, "class" => "act_button"));
-        if ($item->whtype != 'STATIC') {
+        if (($item->whtype != 'STATIC') && ($item->pname = $place)) {
             $but .= button("Travel", array("ID" => "TRAVEL_" . $item->id, "class" => "act_button"));
         }
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
@@ -136,8 +150,6 @@ if ($list) {
     }
 }
 ?>
-
-THIS SHOULD BE FILTERED BY MARKETPLACE OR CHECK IF GOODS ARE PASSED FROM A PLACE TO ANOTHER
 
 <div class="form-popup" id="sellForm">
   <form class="form-container" autocomplete="off">
@@ -157,13 +169,15 @@ THIS SHOULD BE FILTERED BY MARKETPLACE OR CHECK IF GOODS ARE PASSED FROM A PLACE
 <div class="form-popup" id="travelForm">
   <form class="form-container" autocomplete="off">
     <h3>Travel setup</h3>
-    
+    <?php if ($routes) : ?>
     <label for="route"><b>Travel route</b></label><br/>
     <?php
         echo form_dropdown("route",$routes,"id = route_id");
     ?>
-
     <button type="button" class="btn" id="btn_start_travel">Departure</button>
+    <?php else: ?>
+    <br/>No routes available. Did you select a marketplace?
+    <?php endif; ?>
     <button type="button" class="btn cancel" id="btn_cancel_travel">Cancel</button>
   </form>
 </div>    

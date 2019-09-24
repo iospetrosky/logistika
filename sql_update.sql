@@ -1,8 +1,6 @@
---check if the index is created on mysql
-create unique index wg_whgoods on warehouses_goods(id_warehouse,id_good);
--- check table production points and add "default 0" TO ALL FIELDS
+drop view if exists v_major_warehouses_goods;
 
-create view v_player_warehouses_goods as
+CREATE VIEW v_major_warehouses_goods AS
     SELECT p.id AS id_place,
            p.pname,
            p.population,
@@ -23,9 +21,129 @@ create view v_player_warehouses_goods as
            warehouses_goods g ON w.id = g.id_warehouse
            INNER JOIN
            goods o ON g.id_good = o.id
+     WHERE y.ptype = 'AI';
+
+     
+     
+drop VIEW if exists v_marketplace     ;
+
+CREATE VIEW v_marketplace AS
+    SELECT m.id,
+           m.id_place,
+           p.pname,
+           m.id_player,
+           y.fullname,
+           y.ptype,
+           y.gold,
+           m.op_type,
+           m.op_scope,
+           m.id_good,
+           g.gname,
+           g.gtype,
+           m.quantity,
+           m.price
+      FROM marketplace m
+           INNER JOIN
+           places p ON m.id_place = p.id
+           INNER JOIN
+           players y ON m.id_player = y.id
+           INNER JOIN
+           goods g ON m.id_good = g.id;     
+           
+drop VIEW if exists v_marketplace_equiv;
+CREATE VIEW v_marketplace_equiv AS
+    SELECT m.id,
+           m.id_place,
+           p.pname,
+           m.id_player,
+           y.fullname,
+           y.ptype,
+           y.gold,
+           m.op_type,
+           m.op_scope,
+           m.id_good,
+           coalesce(e.id_equiv, m.id_good) AS id_equiv,
+           g.gname,
+           g.gtype,
+           m.quantity,
+           m.price,
+           coalesce(e.quantity, 1) * m.quantity AS equiv_quantity,
+           m.price / coalesce(e.quantity, 1) AS equiv_price
+      FROM marketplace m
+           INNER JOIN
+           places p ON m.id_place = p.id
+           INNER JOIN
+           players y ON m.id_player = y.id
+           INNER JOIN
+           goods g ON m.id_good = g.id
+           LEFT JOIN
+           equivalent e ON m.id_good = e.id_original;         
+
+           
+drop VIEW if exists v_places_production;           
+CREATE VIEW v_places_production AS
+    SELECT a.id AS id_place,
+           a.pname,
+           b.good_id AS id_good,
+           c.gname,
+           b.quantity
+      FROM places a
+           INNER JOIN
+           placeproduction b ON a.id = b.place_id
+           INNER JOIN
+           goods c ON b.good_id = c.id;
+
+drop VIEW if exists v_places_whouse_players;
+CREATE VIEW v_places_whouse_players AS
+    SELECT p.id AS id_place,
+           p.pname,
+           p.population,
+           w.id AS id_whouse,
+           w.capacity,
+           w.whtype,
+           y.id AS id_player,
+           y.fullname,
+           y.ptype,
+           y.gold,
+           y.diamond
+      FROM places p
+           INNER JOIN
+           warehouses w ON p.id = w.place_id
+           INNER JOIN
+           players y ON w.player_id = y.id;
+
+drop VIEW if exists v_player_warehouses_goods ;
+CREATE VIEW v_player_warehouses_goods AS
+    SELECT g.id,
+           p.id AS id_place,
+           p.pname,
+           p.population,
+           p.ptype,
+           w.id AS id_whouse,
+           y.id AS id_player,
+           w.capacity,
+           y.fullname,
+           coalesce(g.id_good, 0) AS id_good,
+           o.gname,
+           coalesce(g.quantity - g.locked, 0) AS avail_quantity,
+           coalesce(g.locked, 0) AS locked,
+           w.whtype
+      FROM places p
+           LEFT JOIN
+           warehouses w ON p.id = w.place_id
+           LEFT JOIN
+           players y ON w.player_id = y.id
+           LEFT JOIN
+           warehouses_goods g ON w.id = g.id_warehouse
+           LEFT JOIN
+           goods o ON g.id_good = o.id
      WHERE y.ptype = 'HU';
 
- CREATE VIEW v_prodpoints_players AS
+
+     
+drop VIEW if exists v_prodpoints_players ;
+
+CREATE VIEW v_prodpoints_players AS
     SELECT pp.id,
            coalesce(pwf.id_wf, 0) AS id_wf,
            pp.rnd_order,
@@ -58,69 +176,78 @@ create view v_player_warehouses_goods as
               pp.rnd_order ASC,
               pp.id_good ASC;
 
-CREATE VIEW v_places_whouse_players AS
-    SELECT p.id AS id_place,
-           p.pname,
-           p.population,
-           w.id AS id_whouse,
-           w.capacity,
+
+drop VIEW if exists v_transports_locations;
+
+CREATE VIEW v_transports_locations AS
+    SELECT w.id,
+           w.player_id,
            w.whtype,
-           y.id AS id_player,
-           y.fullname,
-           y.ptype,
-           y.gold,
-           y.diamond
-      FROM places p
+           p.fullname,
+           tm.route_id,
+           coalesce(t.description, 'not set') AS description,
+           coalesce(t.traveltype, 'none') AS traveltype,
+           t.hexcost,
+           tm.mov_points,
+           tm.curr_points,
+           tm.hexmap,
+           coalesce(x.pname, 'travel') AS current_location,
+           place_id AS is_landed
+      FROM warehouses w
            INNER JOIN
-           warehouses w ON p.id = w.place_id
+           transport_movements tm ON w.id = tm.id
            INNER JOIN
-           players y ON w.player_id = y.id;
+           players p ON w.player_id = p.id
+           LEFT JOIN
+           traderoutes t ON abs(tm.route_id) = t.id
+           LEFT JOIN
+           places x ON x.hexmap = tm.hexmap
+     WHERE whtype <> 'STATIC';
 
-CREATE VIEW v_player_warehouses_goods AS
-    SELECT p.id AS id_place,
-           p.pname,
-           p.population,
-           p.ptype,
-           w.id AS id_whouse,
-           y.id AS id_player,
-           y.fullname,
-           g.id_good,
-           o.gname,
-           g.quantity - g.locked AS avail_quantity,
-           g.locked,
-           w.whtype
-      FROM places p
-           INNER JOIN
-           warehouses w ON p.id = w.place_id
-           INNER JOIN
-           players y ON w.player_id = y.id
-           INNER JOIN
-           warehouses_goods g ON w.id = g.id_warehouse
-           INNER JOIN
-           goods o ON g.id_good = o.id
-     WHERE y.ptype = 'HU';
+drop view if exists v_workflows;
 
--- market equivalents keep only v_marketplace_equiv AND drop the other
-create table traderoutes (
-    id       INTEGER      PRIMARY KEY AUTOINCREMENT,
-    hexlength int default 0,
-    starthex int default 0,
-    endhex int default 0,
-    hexcost int default 0,
-    description varchar(200),
-    traveltype varchar(20) default 'ROAD'
+CREATE VIEW v_workflows AS
+    SELECT pw.id_wf,
+           pw.id_good,
+           g1.gname,
+           pw.req_good,
+           g2.gname,
+           pw.quantity
+      FROM productionworkflow pw
+           LEFT JOIN
+           goods g1 ON pw.id_good = g1.id
+           LEFT JOIN
+           goods g2 ON pw.req_good = g2.id;
+
+CREATE TABLE transport_movements (
+    id          INT      PRIMARY KEY AUTO_INCREMENT,
+    mov_points  FLOAT        DEFAULT 1,
+    curr_points FLOAT        DEFAULT 0,
+    hexmap      VARCHAR (10) DEFAULT 'X0Y0', --create an index on this field
+    route_id    INT          DEFAULT 0 
 );
 
-in table places drop columns mapx and mapy and replace with hexmap varchar(10)
 
 
-create table routespaths (
-    id       INTEGER      PRIMARY KEY AUTOINCREMENT,
-    id_route int not null,
-    pathsequence int default 0,
-    mapname varchar(40) not null,
-    map_tile varchar(20) not null
-);
 
-create unique index rpt_routeseq on routespaths(id_route,pathsequence);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+           

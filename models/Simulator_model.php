@@ -44,7 +44,7 @@ class Simulator_model extends CI_Model {
     }
 
     public function get_wh_goods($some_id, $id_of) {
-        $query = $this->db->select('id_whouse,id_player,capacity,id_good,avail_quantity,locked')
+        $query = $this->db->select('id_whouse,id_player,capacity,id_good,avail_quantity,locked,id_place')
                             ->from("v_player_warehouses_goods")
                             ->where($id_of,$some_id)
                             ->get();
@@ -71,7 +71,12 @@ class Simulator_model extends CI_Model {
     public function get_available_routes($id_place) {
         //get the hexagon of the place
         $hex = $this->db->select("hexmap")->from("places")
-                        ->where("id",$id_place)->get()->result()[0]->hexmap;
+                        ->where("id",$id_place)->get()->result();
+        if ($hex) {
+            $hex = $hex[0]->hexmap;
+        } else {
+            return false;
+        }
         //get the possible routes from this hex
         $routes = $this->db->query("select id as route_id, description from traderoutes where starthex = '$hex' UNION " . 
                                    "select id * -1 as route_id, description from traderoutes where endhex = '$hex'")->result();

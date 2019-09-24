@@ -139,12 +139,16 @@ class Simulator extends CI_Controller {
         $data["url"] = explode("/", $this->uri->uri_string());
         $data["list"] = $this->simulator_model->get_storage_of($this->input->cookie("current_id"));
         $routes = $this->simulator_model->get_available_routes($this->input->cookie("market_id"));
+        $data["place"] = $this->simulator_model->get_place_name($this->input->cookie("market_id"));
         if($routes) {
+            //transform to an array to be passed to the dropdown list
             $data["routes"] = array();
             $x = 0;
             foreach($routes as $rt) {
                 $data["routes"][$rt->route_id] = $rt->description;
             }
+        } else {
+            $data["routes"] = false;
         }
         $this->load->view('intro',$data);
         $this->load->view('storage_form',$data);
@@ -162,6 +166,9 @@ class Simulator extends CI_Controller {
         }
         if(($goods_from->id_player!=$user_id) || ($goods_from->id_player!=$user_id)) {
             die("Both warehouses must belong to the same player");// this should not happen by normal means
+        }
+        if($goods_from->id_place != $goods_to->id_place) {
+            die("Warehouses must be in the same location");
         }
         if($goods_from->avail_quantity < $amount) {
             //we don't move locked quantities as well
@@ -182,6 +189,5 @@ class Simulator extends CI_Controller {
         $user_id = $this->input->cookie("current_id");
         $ret = $this->simulator_model->create_sell_order($wh_goods_id, $amount, $price, $user_id);
         echo $ret;
-        
     }
 }
