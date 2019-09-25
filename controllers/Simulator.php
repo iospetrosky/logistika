@@ -40,7 +40,11 @@ class Simulator extends CI_Controller {
 
     public function cancelroute($id_route) {
         $res = $this->simulator_model->cancel_route($id_route);
-        echo "OK"; // manage errors also in the function below
+        if ($res) {
+            echo "OK"; // manage errors also in the function below
+        } else {
+            echo "The route can be cancelled only when the trasport is near a place";
+        }
     }
     
     public function createtransport() {
@@ -189,5 +193,9 @@ class Simulator extends CI_Controller {
         $user_id = $this->input->cookie("current_id");
         $ret = $this->simulator_model->create_sell_order($wh_goods_id, $amount, $price, $user_id);
         echo $ret;
+    }
+    
+    public function begintravel($trans_id, $route_id) {
+        echo $this->simulator_model->begin_travel($trans_id, $route_id);
     }
 }

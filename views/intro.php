@@ -49,7 +49,7 @@ if (strpos(uri_string(),"/map") !== false):
 ?>
 <style>
 .map_img {
-    _background-image: url('<?php echo base_url("logistika/images/island_map.png"); ?>');
+    background-image: url('<?php echo base_url("logistika/images/island_map.png"); ?>');
     width: <?php echo $map_wdt; ?>px;
     height: <?php echo $map_hgt; ?>px;
     position: relative;

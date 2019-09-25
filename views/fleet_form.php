@@ -87,7 +87,7 @@ if ($list) {
                 unset($data["disabled"]);
             }
             if($columns[$c][0]=="Status") {
-                $v?$data["value"]="Home":"Away";
+                $data["value"]=($v?"Home":"Away"); //curioso che scriva uno Zero
             }
             $html = form_input($data);
             $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell " . $special_class));

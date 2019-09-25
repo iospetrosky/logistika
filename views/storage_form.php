@@ -61,8 +61,8 @@ function run_local() {
         })
     })
     $("#btn_start_travel").mouseup(function(e) {
-        //create a market order 
-        $.get(base_url + "/simulator/begintravel/" + last_id + "/" + $("#txt_quantity").val() + "/" + $("#txt_price").val(), function(data){
+        //last_id contains the ID of the warehouse, in this case a mean of transport
+        $.get(base_url + "/simulator/begintravel/" + last_id + "/" + $("#txt_route_id").val(), function(data){
             if (data != "OK") { 
                 ShowAlert(data,'Error','',ajax_url + "storage"); 
             } else {
@@ -142,7 +142,7 @@ if ($list) {
         
         $but= button("Sell", array("ID" => "SELL_" . $item->id, "class" => "act_button"));
         if (($item->whtype != 'STATIC') && ($item->pname = $place)) {
-            $but .= button("Travel", array("ID" => "TRAVEL_" . $item->id, "class" => "act_button"));
+            $but .= button("Travel", array("ID" => "TRAVEL_" . $item->id_whouse, "class" => "act_button"));
         }
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
@@ -172,7 +172,7 @@ if ($list) {
     <?php if ($routes) : ?>
     <label for="route"><b>Travel route</b></label><br/>
     <?php
-        echo form_dropdown("route",$routes,"id = route_id");
+        echo form_dropdown("route",$routes,"","id = txt_route_id");
     ?>
     <button type="button" class="btn" id="btn_start_travel">Departure</button>
     <?php else: ?>

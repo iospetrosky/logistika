@@ -110,10 +110,22 @@ class Simulator_model extends CI_Model {
         return true;
     }
     
-    public function cancel_route($id_route) {
+    public function cancel_route($id_transportroute) {
+        //this can be done only if there's a city in the current tile
+        $location = $this->db->select("current_location, location_id")
+                                ->from("v_transports_locations")
+                                ->where("id",$id_transportroute)
+                                ->get()->result()[0];
+        if ($location->current_location == 'travel') return false;
+        //otherwise there is a location along the way
+        $this->db->trans_begin();
         $this->db->set("route_id",0)
-                    ->where("id", $id_route)
+                    ->where("id", $id_transportroute)
                     ->update("transport_movements");
+        $this->db->set("place_id",$location->location_id)
+                    ->where("id", $id_transportroute)
+                    ->update("warehouses");
+        $this->db->trans_commit();
         return true;
     }        
 
@@ -156,15 +168,16 @@ class Simulator_model extends CI_Model {
         $good = $this->db->select("id, locked")
                         ->from("v_player_warehouses_goods")
                         ->where('id_good',$order->id_good)
-                            ->and_where('id_place',$order->id_place)
-                            ->and_where('id_player',$user_id)
-                            ->and_where('locked >= ' . $order->quantity)
+                            ->where('id_place',$order->id_place)
+                            ->where('id_player',$user_id)
+                            ->where('locked >= ' . $order->quantity)
                         ->order_by("locked ASC")
-                        ->get()->result();
-        if ($good->num_rows > 0) {
-            $good = $good[0];
-            $this->db->set("locked", $good[0]->locked - $order->quantity)
-                        ->where('id',$good[0]->id)
+                        ->get();
+        //echo $this->db->last_query();
+        if ($good->num_rows() > 0) {
+            $good = $good->result()[0];
+            $this->db->set("locked", $good->locked - $order->quantity)
+                        ->where('id',$good->id)
                         ->update("warehouses_goods");
             $changed_rows += $this->db->affected_rows();
         }
@@ -222,6 +235,57 @@ class Simulator_model extends CI_Model {
             return "An error occurred while updating the storage data";
         }
         $this->db->trans_commit();
+        return "OK";
+    }
+    
+    public function begin_travel($trans_id, $route_id) {
+        /*
+        Get the hexmap of the place where the transport is standing.
+        Decide if the route is made forward or backwards
+        For now let's assume the player selects a correct type of route (SEA-ROAD-ETC)
+        */
+        if ($transport = $this->db->select("id, place_id")->from("warehouses")
+                                ->where("id", $trans_id)->get()->result()) {
+            $transport = $transport[0];
+        } else {
+            return "Can't identify the transport";
+        }
+        if ($trans_move = $this->db->select("id,hexmap,route_id")->from("transport_movements")
+                                    ->where("id", $trans_id)->get()->result()) {
+            $trans_move = $trans_move[0];
+        } else {
+            return "Can't identify the transport movement rules";
+        }
+        if ($place = $this->db->select("id, hexmap")->from("places")
+                                ->where("id", $transport->place_id)->get()->result()) {
+            $place = $place[0];
+        } else {
+            return "Can't identify the place";
+        }
+        if ($route = $this->db->select("id, starthex, endhex, traveltype")
+                                ->from("traderoutes")->where("id",$route_id)
+                                ->get()->result()) {
+            $route = $route[0];
+        } else {
+            return "Can't identify the route";
+        }
+        //All fine, make the changes
+        $this->db->trans_begin();
+        $transport->place_id = 0;
+        $this->db->where("id", $trans_id)->update("warehouses",$transport);
+        
+        $trans_move->hexmap = $place->hexmap;
+        if ($place->hexmap == $route->starthex) {
+            $trans_move->route_id = $route_id;
+        } elseif ($place->hexmap == $route->endhex) {
+            $trans_move->route_id = -$route_id;
+        } else {
+            $this->db->trans_rollback();
+            return "Unmatched start or end point on travel route";
+        }
+        $this->db->where("id",$trans_id)->update("transport_movements", $trans_move);
+        $this->db->trans_commit();
+        //$this->db->trans_rollback();
         return "OK";
     }
 }
