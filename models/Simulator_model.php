@@ -7,9 +7,18 @@ class Simulator_model extends CI_Model {
         //$this->load->database(); // loaded by default
     }
     public function get_fleet_info($user_id) {
-        $query = $this->db->select("id,whtype,description,traveltype,mov_points,curr_points,hexmap,current_location,is_landed")
-                            ->from("v_transports_locations")
+        //this used to be a selection on v_transports_locations but for strange reasons 
+        //the coalesce values are trasformed in strage strings
+        $query = $this->db->select("w.id,  w.whtype, coalesce(t.description, 'not set') AS description")
+                            ->select("coalesce(t.traveltype, 'none') AS traveltype,  tm.mov_points, tm.curr_points")
+                            ->select("tm.hexmap, coalesce(x.pname, 'travel') AS current_location, w.place_id AS is_landed")
+                            ->from("warehouses w")
+                            ->join("transport_movements tm","w.id = tm.id")
+                            ->join("players p","w.player_id = p.id")
+                            ->join("traderoutes t","abs(tm.route_id) = t.id","left")
+                            ->join("places x", "x.hexmap = tm.hexmap","left")
                             ->where("player_id",$user_id)
+                            ->where("whtype <>","STATIC")
                             ->get();
         return $query->result();
     }
@@ -79,7 +88,7 @@ class Simulator_model extends CI_Model {
         }
         //get the possible routes from this hex
         $routes = $this->db->query("select id as route_id, description from traderoutes where starthex = '$hex' UNION " . 
-                                   "select id * -1 as route_id, description from traderoutes where endhex = '$hex'")->result();
+                                   "select id as route_id, description from traderoutes where endhex = '$hex'")->result();
         return $routes;
     }
     
@@ -116,7 +125,7 @@ class Simulator_model extends CI_Model {
                                 ->from("v_transports_locations")
                                 ->where("id",$id_transportroute)
                                 ->get()->result()[0];
-        if ($location->current_location == 'travel') return false;
+        if (!$location->current_location) return false; //meaning it is travelling
         //otherwise there is a location along the way
         $this->db->trans_begin();
         $this->db->set("route_id",0)

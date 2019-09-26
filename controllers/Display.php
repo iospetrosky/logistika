@@ -34,7 +34,9 @@ class Display extends CI_Controller {
                 $data['routepath'] = $this->display_model->get_routepath($id);
                 $data['path_id'] = $id;
                 break;
-
+            case 'showtransp':
+                $data['transports'] = $this->display_model->get_transport_infos($id);
+                break;
         }
         $this->index($data);
         $this->load->view('map_view',$data);

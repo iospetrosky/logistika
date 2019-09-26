@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<title>Logistika - config</title>
 
 <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script-->
@@ -66,6 +67,9 @@ if (strpos(uri_string(),"/map") !== false):
     cursor: pointer;
 }
 .inpath {
+    background-image: url('<?php echo base_url("logistika/images/hexagon_green2.png"); ?>');
+}
+.transports {
     background-image: url('<?php echo base_url("logistika/images/hexagon_green2.png"); ?>');
 }
 

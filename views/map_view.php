@@ -21,6 +21,17 @@ endforeach;
 endif;
 ?>
 
+<?php 
+if($action=='showtransp'):
+foreach($transports as $item):
+?>
+$('div[name=<?php echo $item->hexmap; ?>]').addClass("transports");
+<?php
+endforeach;
+endif;
+?>
+
+
 <?php if($action=='draw'): ?>
 //special behaviour when in DRAW mode
 $(".hexagon").mouseup(function(e) {
@@ -63,12 +74,16 @@ $(".editable").change(function(e) {
             break;
     }
 })
-
-
-
 <?php endif; ?>
 
-
+<?php if($action=='showtransp'): ?>
+$(".transports").mouseup(function(e) {
+    var curr_id = $(this).attr("name")
+    $(".map_tile_info").fadeOut(1, function() {
+        $("#TILE_"+curr_id).fadeIn("slow")        
+    })
+})
+<?php endif; ?>
 } // run_local    
     
 </script>
@@ -86,8 +101,8 @@ $(".editable").change(function(e) {
 
         <?php endforeach; ?>
     </div>
+    <div class="map_infos">
     <?php if($action=='draw'): ?>
-    <div class="map_draw_path">
     <?php
     $columns = array (
         array("ID", 50, "RO"),
@@ -132,6 +147,14 @@ $(".editable").change(function(e) {
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
         
     } ?>
+    <?php endif; // action = DRAW ?>
+    <?php if($action=='showtransp'): ?>
+    <?php
+        foreach($transports as $item) {
+            $html = $item->hexmap . " - " . $item->route_id;
+            echo div($html, array("class"=>'map_tile_info', "id"=>"TILE_" . $item->hexmap));
+        }
+    ?>
+    <?php endif; // action = TRANSPORTS ?>
     </div>
-    <?php endif; ?>
 </div>

@@ -68,6 +68,10 @@ foreach($columns as $c) {
 echo div($inner, array("_style" => "width:1000px"));
 
 if ($list) {
+    echo anchor($bu . "/display/map/showtransp/" . get_cookie("current_id"),"Show on map");
+    echo br();
+    
+    
     foreach($list as $item) {
         $c = 0;
         $inner = "";

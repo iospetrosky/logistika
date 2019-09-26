@@ -34,6 +34,16 @@ class Display_model extends CI_Model {
         return $this->get_routepath($route_id);
     }
     
+    public function get_transport_infos($player_id) {
+        $this->db->select("tm.id,tm.hexmap,tm.route_id,w.player_id")
+            ->from("transport_movements tm")
+            ->join("warehouses w", "tm.id = w.id");
+        if ($player_id) {
+            $this->db->where("w.player_id",$player_id);
+        }
+        return $this->db->get()->result();
+    }
+    
     public function majorwarehouses($field = false, $value = false) {
         return $this->generic_select("v_major_warehouses_goods", $field, $value);
     }
