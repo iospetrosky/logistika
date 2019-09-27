@@ -79,8 +79,10 @@ $(".editable").change(function(e) {
 <?php if($action=='showtransp'): ?>
 $(".transports").mouseup(function(e) {
     var curr_id = $(this).attr("name")
-    $(".map_tile_info").fadeOut(1, function() {
-        $("#TILE_"+curr_id).fadeIn("slow")        
+    $(".map_tile_info").fadeOut(1)
+    //promise... waits for all the fadeOut are completed
+    $(".map_tile_info").promise().done(function() {
+        $(".map_tile_info[name=TILE_"+curr_id+"]").fadeIn("slow")        
     })
 })
 <?php endif; ?>
@@ -151,8 +153,22 @@ $(".transports").mouseup(function(e) {
     <?php if($action=='showtransp'): ?>
     <?php
         foreach($transports as $item) {
-            $html = $item->hexmap . " - " . $item->route_id;
-            echo div($html, array("class"=>'map_tile_info', "id"=>"TILE_" . $item->hexmap));
+            //echo "<!--" . print_r($item, true) . "-->";
+            $this->table->set_caption($item->hexmap . " - " . $item->pname);
+            if(isset($item->fullname)) $this->table->add_row(array('data'=>'Player','class'=>'TD_Label'),$item->fullname);
+            $this->table->add_row(array('data'=>'Type','class'=>'TD_Label'),$item->whtype);
+            $this->table->add_row(array('data'=>'Route','class'=>'TD_Label'),$item->description);
+            if(!is_array($item->goods)) {
+                $this->table->add_row(array('data'=>'Goods','class'=>'TD_Label'),'Empty cargo');
+            } else {
+                $this->table->add_row(array('data'=>'Goods','class'=>'TD_Label','rowspan'=>count($item->goods)),$item->goods[0]->gname . ' (' . $item->goods[0]->quantity . ')');
+                for($k=1;$k<count($item->goods);$k++) {
+                    $this->table->add_row($item->goods[$k]->gname . ' (' . $item->goods[$k]->quantity . ')');
+                }
+            }
+            $html = $this->table->generate();
+            $this->table->clear();
+            echo div($html, array("class"=>'map_tile_info', "name"=>"TILE_" . $item->hexmap));
         }
     ?>
     <?php endif; // action = TRANSPORTS ?>

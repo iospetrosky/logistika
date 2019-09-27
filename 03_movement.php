@@ -31,6 +31,7 @@ if($rows) {
 $rows = $db->query("select * from v_transports_locations where is_landed = 0 and route_id <> 0 and curr_points >= hexcost order by route_id asc");
 $sql_move_transp = "update transport_movements set curr_points = curr_points - ?, hexmap = ? where id = ?";
 $sql_reach_dest = "update warehouses set place_id = ? where id = ?";
+$sql_cancel_route = "update transport_movements set route_id = 0 where id = ?";
 if ($rows) {
     echo "Moving transports\n";
     $db->beginTransaction();
@@ -51,6 +52,7 @@ if ($rows) {
             $destination = $db->query("select * from places where hexmap = '{$next_tile->map_tile}'")[0];
             echo sprintf("The transport arrived in %s \n", $destination->pname);
             $db->exec_prepared($sql_reach_dest,array($destination->id, $r->id));
+            $db->exec_prepared($sql_cancel_route,array($r->id));
         }
     }
     $db->commit();

@@ -4,8 +4,15 @@ class LocalDB extends my_pdo {
 	protected  $user_id = 0;
 
 	function __construct() {
-		parent::__construct("mysql","localhost;charset=utf8","logistika","pi","emberlee1");
-		//parent::__construct("sqlite","/users/LPEDR/Documents/SAP/Util/logistika.db");
+        //let's avoid to change the code at home/work
+        switch (gethostname()) {
+            case "raspberrypi": 
+                parent::__construct("mysql","localhost;charset=utf8","logistika","pi","emberlee1");
+                break;
+            case "L-NAY-60623": //office PC
+                parent::__construct("sqlite","/users/LPEDR/Documents/SAP/Util/logistika.db");
+                break;
+        }
 	}
     
     function get_default_price($id_good, $type) {

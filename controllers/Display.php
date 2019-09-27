@@ -7,6 +7,7 @@ class Display extends CI_Controller {
     {
         parent::__construct();
         $this->load->helper('html_gen_helper');
+        $this->load->library('table');
         $this->load->model('display_model');
         $this->load->model('sets_model');
     }

@@ -35,13 +35,35 @@ class Display_model extends CI_Model {
     }
     
     public function get_transport_infos($player_id) {
-        $this->db->select("tm.id,tm.hexmap,tm.route_id,w.player_id")
+        //used to display transport infos for a player on the map
+        $this->db->select("tm.id,tm.hexmap,tm.route_id,w.player_id,w.whtype,coalesce(x.pname,'Travelling') as pname")
+            ->select("coalesce(t.description,'Not on a route') as description")
             ->from("transport_movements tm")
-            ->join("warehouses w", "tm.id = w.id");
+            ->join("warehouses w", "tm.id = w.id")
+            ->join("places x", "x.hexmap = tm.hexmap","left")
+            ->join("traderoutes t","abs(tm.route_id) = t.id","left");
         if ($player_id) {
             $this->db->where("w.player_id",$player_id);
+        } else {
+            //the admin can see the transport of everybody
+            $this->db->select("p.fullname")
+                        ->join("players p", "p.id = w.player_id");
         }
-        return $this->db->get()->result();
+        $data = $this->db->get()->result();
+        //now collect the cargo info for every transport
+        foreach($data as &$item) {
+            $this->db->select("wg.id_good, wg.quantity, g.gname")
+                        ->from("warehouses_goods wg")
+                        ->join("goods g", "wg.id_good = g.id")
+                        ->where("id_warehouse", $item->id);
+            $query = $this->db->get();
+            if(!$item->goods = $query->result()) {
+                $item->goods = "Empty";
+            }
+        }
+        
+        
+        return $data;
     }
     
     public function majorwarehouses($field = false, $value = false) {

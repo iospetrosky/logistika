@@ -12,6 +12,7 @@ class Simulator_model extends CI_Model {
         $query = $this->db->select("w.id,  w.whtype, coalesce(t.description, 'not set') AS description")
                             ->select("coalesce(t.traveltype, 'none') AS traveltype,  tm.mov_points, tm.curr_points")
                             ->select("tm.hexmap, coalesce(x.pname, 'travel') AS current_location, w.place_id AS is_landed")
+                            ->select("tm.transpname")
                             ->from("warehouses w")
                             ->join("transport_movements tm","w.id = tm.id")
                             ->join("players p","w.player_id = p.id")
@@ -141,8 +142,8 @@ class Simulator_model extends CI_Model {
     public function movegoods($amount,$from,$to) {
         //$from and $to are records collected with get_wh_goods
         $this->db->trans_begin();
-        $sql = sprintf("update warehouses_goods set quantity = quantity - %s, locked = locked - %s where quantity-locked >= %s and id_warehouse = %s and id_good = %s",
-                            $amount,$amount,$amount,$from->id_whouse,$from->id_good);
+        $sql = sprintf("update warehouses_goods set quantity = quantity - %s where quantity-locked >= %s and id_warehouse = %s and id_good = %s",
+                            $amount,$amount,$from->id_whouse,$from->id_good);
         $this->db->query($sql);
         if ($this->db->affected_rows() != 1) {
             $this->db->trans_rollback();

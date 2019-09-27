@@ -23,10 +23,25 @@ function run_local() {
         }
         if(toks[0] == "NEW") {
             $("#transportForm").css("display","block");
-            
         }
     })
-
+    
+    $(".editable").change(function() {
+        //console.log($(this).attr("ID"))
+        var toks = $(this).attr("ID").split("_");
+        var item_id = $(this).attr("ID");
+        last_id = toks[1];
+        $("#"+$(this).attr("ID")).prop("disabled",true)
+        switch(toks[0]) {
+            case "transpname":
+                $.get(base_url+"/FE/A/transport_movements/transpname/"+$(this).val() + "/" + item_id, function(data){
+                    console.log(data)
+                    
+                })
+                
+        }
+    })
+    
     $("#btn_create").mouseup(function(e) {
         //create a market order 
         $.post(ajax_url + "createtransport/",$("#newitem_form").serialize(), function(data){
@@ -39,13 +54,10 @@ function run_local() {
     })
 
     $("#btn_cancel").mouseup(function(e) {
-        $("#sellForm").css("display","none");
+        $("#transportForm").css("display","none");
     })
-
 } // run_local    
-    
 </script>
-
 
 <?php 
 //id,description,traveltype,mov_points,curr_points,hexmap,current_location"
@@ -59,6 +71,7 @@ $columns = array (
     array("HEX map", 80, "RO"),
     array("Location", 100, "RO"),
     array("Status",70,"RO"),
+    array("Name",150, "WR"),
     array("", 120)
 );
 $inner = "";
