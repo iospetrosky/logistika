@@ -45,7 +45,6 @@ class Display extends CI_Controller {
 
     public function marketplace($field = false, $value = false) {
         $data['list'] = $this->display_model->marketplace($field, $value); 
-        //$data['list'] = $this->display_model->marketplace("id_place", "1"); 
         $data['columns'] = array (
                 array("ID", 50),
                 array("ID place", 50),

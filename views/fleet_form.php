@@ -34,9 +34,16 @@ function run_local() {
         $("#"+$(this).attr("ID")).prop("disabled",true)
         switch(toks[0]) {
             case "transpname":
-                $.get(base_url+"/FE/A/transport_movements/transpname/"+$(this).val() + "/" + item_id, function(data){
+                //$.get(base_url+"/FE/A/" + last_id + "/transport_movements/transpname/" + $(this).val() + "/" + item_id , function(data) {
+                $.get(base_url + "/FE/A/" + last_id, 
+                                  {'table'   : 'transport_movements', 
+                                   'field'  : 'transpname', 
+                                   'newval' : $(this).val(),
+                                  'ret_id' : item_id}, 
+                            function(data) {
                     console.log(data)
-                    
+                    data = $.parseJSON(data)
+                    $("#"+data.item).prop("disabled",false)
                 })
                 
         }

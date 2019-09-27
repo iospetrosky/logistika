@@ -11,8 +11,12 @@ and returns the result
         $this->load->model('fieldeditor_model');
     }
     
-    public function A($table,$field,$value,$ret_id)  {
-        $r = $this->fieldeditor_model->exec_edit($table,$field,$value);
+    public function A($id)  {
+        $table = $this->input->post_get('table');
+        $field = $this->input->post_get('field');
+        $value = $this->input->post_get('newval');
+        $ret_id = $this->input->post_get('ret_id');
+        $r = $this->fieldeditor_model->exec_edit($table,$field,$value,$id);
         $json = new stdClass();
         $json->message = $r?'OK':'Error';
         $json->item = $ret_id;
