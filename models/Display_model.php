@@ -26,7 +26,7 @@ class Display_model extends CI_Model {
         $path->pathsequence = 1;
         $path->map_tile = $tiles->starthex;
         $this->db->insert('routespaths',$path);
-        $path->pathsequence = 100;
+        $path->pathsequence = 999;
         $path->map_tile = $tiles->endhex;
         $this->db->insert('routespaths',$path);
         $this->db->trans_commit();
@@ -85,10 +85,10 @@ class Display_model extends CI_Model {
     
     //not really display, should be moved 
     public function add_tile_to_path($id_route, $token) {
-        //first get the current path and detect the last token inserted (not the closing = 100)
+        //first get the current path and detect the last token inserted (not the closing = 999)
         $query = $this->db->select("*")->from("routespaths")
                             ->where("id_route",$id_route)
-                            ->where("pathsequence < 100")
+                            ->where("pathsequence < 999")
                             ->order_by("pathsequence DESC")
                             ->get();
         if($route = $query->result()) {

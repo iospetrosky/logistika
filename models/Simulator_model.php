@@ -25,7 +25,7 @@ class Simulator_model extends CI_Model {
     }
     
     public function get_storage_of($id) {
-        $query = $this->db->select('id, pname,id_whouse,capacity,gname,avail_quantity,locked,whtype')
+        $query = $this->db->select("id, pname,id_whouse,coalesce(transpname,'Warehouse') as whname, capacity,gname,avail_quantity,locked,whtype")
                             ->from('v_player_warehouses_goods')
                             ->where('id_player',$id)
                             ->order_by('pname ASC')

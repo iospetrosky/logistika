@@ -86,11 +86,22 @@ $(".transports").mouseup(function(e) {
     })
 })
 <?php endif; ?>
+
+//the rest does not depend on the view mode
+$(".hexagon").hover(function() {
+    var curr_id = $(this).attr("name")
+    $("#map_tile_name").append($("<span>[" + curr_id + "]</span>"))
+}, function() {
+    $("#map_tile_name").find("span").last().remove()    
+})
+
+
+
 } // run_local    
     
 </script>
 
-<h3><?php echo $mapname; ?></h3>
+<h3 id="map_tile_name"><span><?php echo $mapname; ?>&nbsp;&nbsp;&nbsp;&nbsp;</span></h3>
 <div class="map_box">
     <div class="map_img">
         <?php
@@ -127,7 +138,7 @@ $(".transports").mouseup(function(e) {
                 "value" => $v,
                 "style" => "width:" . (string)($columns[$c][1]-20) . "px"
             );
-            if(($columns[$c][2] == "RO") || ($item->pathsequence == 1) || ($item->pathsequence == 100)) {
+            if(($columns[$c][2] == "RO") || ($item->pathsequence == 1) || ($item->pathsequence == 999)) {
                 $data["disabled"] = "disabled";
                 $data["name"] = "skip_" . $data["name"]; // so we skip when saving
             }  else {
@@ -140,7 +151,7 @@ $(".transports").mouseup(function(e) {
             if ($c == 3) break; // don't display all the fields
         }
         //first and last elements can't be edited
-        if (($item->pathsequence == 1) || ($item->pathsequence == 100)) {
+        if (($item->pathsequence == 1) || ($item->pathsequence == 999)) {
             $but = "";
         } else {
             $but= button("Del", array("ID" => "DEL_" . $item->id, "class" => "act_button"));

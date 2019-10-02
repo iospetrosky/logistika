@@ -50,7 +50,7 @@ if (strpos(uri_string(),"/map") !== false):
 ?>
 <style>
 .map_img {
-    background-image: url('<?php echo base_url("logistika/images/island_map.png"); ?>');
+    background-image: url('<?php echo base_url("logistika/images/{$mapname}.png"); ?>');
     width: <?php echo $map_wdt; ?>px;
     height: <?php echo $map_hgt; ?>px;
     position: relative;
@@ -63,23 +63,23 @@ if (strpos(uri_string(),"/map") !== false):
 }
 .hexagon:hover {
     background-image: url('<?php echo base_url("logistika/images/hexagon_red2.png"); ?>');
+    background-size: <?php echo $hex_wdt; ?>px;
     _background-color: red;
     cursor: pointer;
 }
 .inpath {
     background-image: url('<?php echo base_url("logistika/images/hexagon_green2.png"); ?>');
+    background-size: <?php echo $hex_wdt; ?>px;
 }
 .transports {
     background-image: url('<?php echo base_url("logistika/images/hexagon_green2.png"); ?>');
+    background-size: <?php echo $hex_wdt; ?>px;
 }
 
 </style>
 <?php
-    //now it's empty
-    //echo link_tag('logistika/libraries/map.css');
 endif;
-?>
-<?php
+
 if (strpos(uri_string(),"/storage") !== false):
 ?>
 <style>

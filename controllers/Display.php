@@ -22,11 +22,12 @@ class Display extends CI_Controller {
     }
     
     public function map($action = '', $id = 0) {
-        $data["mapname"] = "demo";
-        $data["hex_wdt"] = 90;
-        $data["hex_hgt"] = 104;
-        $data["map_wdt"] = 630;
-        $data["map_hgt"] = 800;
+        // make all the changes to the map here
+        $data["mapname"] = "swallowed"; // map file must be mapname.png
+        $data["hex_wdt"] = 31; // colored hexagons are also resized accordingly
+        $data["hex_hgt"] = 36;
+        $data["map_wdt"] = 1024;
+        $data["map_hgt"] = 768;
         
         $data["tiles"] = $this->display_model->getmap($data["mapname"]);
         $data['action'] = $action;

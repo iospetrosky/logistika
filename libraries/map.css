@@ -23,7 +23,7 @@
 }
 .path_item {
     font-family: "Arial Black", Gadget, sans-serif;
-    font-size: 19px;
+    font-size: 11px;
     letter-spacing: 2px;
     word-spacing: 2px;
     color: #000000;
@@ -33,8 +33,8 @@
     font-variant: normal;
     text-transform: none;
     position: absolute;
-    left: 25px;
-    top: 60px;
+    left: 7px;
+    top: 6px;
 }
 .TD_Label {
     font-weight: bolder;

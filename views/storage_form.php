@@ -18,13 +18,16 @@ function run_local() {
         drop: function(event, ui) {
             //alert(ui.draggable.find('input').attr("ID"));
             var amount_to_move = prompt("What's the amount to move?", ui.draggable.find('input').val())
-            if (amount_to_move == null) {
+            if  (!amount_to_move) {
                 // revert and bye
                 ui.draggable.animate({top:0, left:0},500);
             } else {
                 //process the request
                 var id_from = ui.draggable.find('input').attr("ID").split("_")[2];
                 var id_to = $(this).find('input').val();
+                if ((!id_from) || (!id_to)) {
+                    ui.draggable.animate({top:0, left:0},500);
+                }
                 $.get(base_url + "/simulator/movegoods/" + amount_to_move + "/" + id_from + "/" + id_to, function(data){
                     if (data != "OK") { 
                         ShowAlert(data,'Error','',ajax_url + "storage"); 
@@ -87,20 +90,24 @@ if ($place != "") {
 }
 
 if ($list) {
+    // Label, width of the input field, Read only or not, width of the column (optional)
+    
     $columns = array (
         array("ID", 50, "RO"),
         array("Place", 150, "RO"),
         array("WH", 50, "RO"),
+        array("Description", 100, "RO"),
         array("Space", 90, "RO"),
         array("Good", 150, "RO"),
-        array("QTY", 60, "RO"),
+        array("QTY", 60, "RO", 90),
         array("Locked", 60, "RO"),
         array("Type", 90, "RO"),
         array("", 100)
     );
     $inner = "";
     foreach($columns as $c) {
-        $inner .= div($c[0], array("style" => "width:" . $c[1] . "px", "class" => "row_edit_cell"));
+        $ww = isset($c[3])?$c[3]:$c[1];
+        $inner .= div($c[0], array("style" => "width:" . $ww . "px", "class" => "row_edit_cell"));
     }
     echo div($inner, array("_style" => "width:1000px"));
     
@@ -129,14 +136,19 @@ if ($list) {
             }
             if ($f == 'id_whouse') {
                 $special_class = "good_dest";
-                //$data["class"] = "good_dest";
-            }
-            if ($f == 'avail_quantity') {
-                $special_class = "good_source";
-                //$data["class"] = "good_source";
             }
             $html = form_input($data);
-            $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell " . $special_class));
+            if ($f == 'avail_quantity') {
+                $special_class = "good_source";
+                $html .= img(array('src'=>'logistika/images/pallet.png',
+                                    'rel'=>'lightbox',
+                                    'alt'=>'Goods',
+                                    'align'=>'middle'
+                                    )
+                            );
+            }
+            $ww = isset($columns[$c][3])?$columns[$c][3]:$columns[$c][1];
+            $inner .= div($html, array("style" => "width:" . $ww . "px", "class" => "row_edit_cell " . $special_class));
             $c++;
         }
         
