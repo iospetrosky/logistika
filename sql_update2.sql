@@ -14,13 +14,13 @@ create table items_prod_cost (
     id int primary key auto increment,
     id_item_prod int default 0,
     id_item_need int default 0,
-    id_matl_need int default 0,
-    quantity int  default 0
+    id_good_need int default 0,
+    quantity float  default 0
 ) engine=innodb;
 
 create index ip_itemp on items_prod_cost(id_item_prod);
 create index ip_itemn on items_prod_cost(id_item_need);
-create index ip_matned on items_prod_cost(id_matl_need);
+create index ip_matned on items_prod_cost(id_good_need);
 
 
 INSERT INTO items (id, tname) VALUES (1, 'Hammer');

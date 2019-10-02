@@ -22,6 +22,36 @@ class Editor_model extends CI_Model {
                 ";
         return $this->db->query($sql)->result();
     }  
+    
+    public function items_production() {
+        /*
+        $query = $this->db->select("pc.id, pc.id_item_prod, i.tname as 'item_name'")
+                            ->select("pc.id_item_need, n.tname as 'item_need'")
+                            ->select("pc.id_good_need, g.gname as 'good_need'")
+                            ->from("items_prod_cost pc")
+                            ->join("items i","pc.id_item_prod = i.id")
+                            ->join("items n","pc.id_item_need = i.id","left")
+                            ->join("goods g","pc.id_good_need = g.id","left")
+                            ->order_by("3 asc")
+                            ->get();
+        */
+        $query = $this->db->select("*")->from("items_prod_cost")
+                            ->order_by("id asc")->get();
+        return $query->result();                    
+    }
+
+    //************************************************************************
+    public function save_itemprod($data) {
+        $this->save_data("items_prod_cost",$data);
+    }
+    public function new_itemprod() {
+        $this->new_data("items_prod_cost","id_item_prod",0);
+    }
+    public function delete_itemprod($id) {
+        $this->delete_data("items_prod_cost", $id);
+    }
+
+    
     //************************************************************************
     public function save_traderoute($data) {
         $this->save_data("traderoutes",$data);

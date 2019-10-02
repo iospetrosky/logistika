@@ -124,7 +124,8 @@ endif;
                        "prod_wf" => "Prod. workflows",
                        "equivalent" => "Equivalent",
                        "goods" => "Goods",
-                       "traderoutes" => "Trade routes");
+                       "traderoutes" => "Trade routes",
+                       "items" => "Items");
     elseif ($url[0] == "display"):
         $links = array("majorwarehouses" => "Major warehouses",
                        "marketplace" => "Marketplaces",

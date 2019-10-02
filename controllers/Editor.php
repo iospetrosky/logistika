@@ -59,8 +59,6 @@ class Editor extends CI_Controller {
         $this->index();
         $this->load->view('traderoutes_form',$data);
     }
-    
-    
 
     public function goods($action = false, $id = false)
     {   
@@ -80,7 +78,6 @@ class Editor extends CI_Controller {
         $this->index();
         $this->load->view('goods_form',$data);
     }
-
 
     public function places($action = false, $id = false)
     {   
@@ -201,15 +198,40 @@ class Editor extends CI_Controller {
                 break;
         }
         
-        
 	    $data['list'] = $this->editor_model->warehouses_goods(); 
         $this->index();
         $this->load->view('wh_goods_form',$data);
-        
-        
     }
     
-    
+    public function items($action = false, $id = false)
+    {
+        switch($action) {
+            case 'save':
+                $this->editor_model->save_itemprod($this->input->post(NULL,false));
+                break;
+            case 'new':
+                $this->editor_model->new_itemprod();
+                break;
+            case 'del':
+                $this->editor_model->delete_itemprod($id);
+                break;
+        }
+
+
+
+        $data['list'] = $this->editor_model->items_production();
+        $data['items'] = array("0"=>"None"); 
+        $data['goods'] = array("0"=>"None");
+        $this->index();
+        // transforming for the dropdown lists
+        foreach($this->sets_model->goods_list() as $xx) {
+            $data['goods'][$xx->id] = $xx->gname;
+        }
+        foreach($this->sets_model->items_list() as $xx) {
+            $data['items'][$xx->id] = $xx->tname;
+        }
+        $this->load->view('items_form',$data);
+    }
     
     
     

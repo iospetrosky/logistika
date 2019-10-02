@@ -81,6 +81,12 @@ class Sets_model extends CI_Model {
         return $query->result();
     }
     
-    
+    public function items_list() {
+        $query = $this->db->select("*")
+                        ->from("items")
+                        ->order_by("tname asc")
+                        ->get();
+        return $query->result();
+    }
 }
     
