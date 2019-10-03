@@ -58,7 +58,7 @@ class Sets_model extends CI_Model {
     }
 
     public function places_list() {
-        $query = $this->db->select("id, pname, major, population, hexmap, ptype")
+        $query = $this->db->select("id, pname, major, population, hexmap, ptype, avail_areas")
                           ->from('places')
                           ->get();    
         return $query->result();
@@ -71,6 +71,14 @@ class Sets_model extends CI_Model {
                           ->get();    
         return $query->result();
 
+    }
+    
+    public function get_prodpoint_types() {
+        $query = $this->db->select("*")
+                          ->from('prodpoint_types')
+                          ->order_by("pptype ASC")
+                          ->get();    
+        return $query->result();
     }
     
     public function traderoutes_list() {

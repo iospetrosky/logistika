@@ -45,6 +45,8 @@ if ($list) {
         array("Workers", 90),
         array("Plains price", 90),
         array("Plains prod", 90),
+        array("Description", 300),
+        array("Produced in", 130),
         array("", 100)
     );
     $inner = "";
@@ -68,10 +70,15 @@ if ($list) {
                 "style" => "width:" . (string)($columns[$c][1]-20) . "px"
             );
             // some fields must be rendered differently
-            if ($f == "gtype") {
-                $html = form_dropdown($f,array("A"=>"A", "B"=>"B", "C"=>"C"),$v,$data);
-            } else {
-                $html = form_input($data);
+            switch($f) {
+                case 'gtype':
+                    $html = form_dropdown($f,array("A"=>"A", "B"=>"B", "C"=>"C"),$v,$data);
+                    break;
+                case 'pptype_req':
+                    $html = form_dropdown($f,$pptypes,$v,$data);
+                    break;
+                default:
+                    $html = form_input($data);
             }
             $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
             $c++;

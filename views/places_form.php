@@ -46,6 +46,7 @@ if ($list) {
         array("Population", 90),
         array("Hex on map", 90),
         array("Terrain", 90),
+        array("Wrk areas", 90),
         array("", 100)
     );
     $inner = "";

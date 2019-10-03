@@ -73,8 +73,13 @@ class Editor extends CI_Controller {
                 $this->editor_model->delete_good($id);
                 break;
         }
-        //print_r($this->players_model->players_list());
         $data['list'] = $this->sets_model->goods_list(); 
+
+        $data['pptypes'] = array("0" => "Not selected");
+        foreach($this->sets_model->get_prodpoint_types() as $ppt) {
+            $data['pptypes'][$ppt->id] = $ppt->pptype;
+        }
+
         $this->index();
         $this->load->view('goods_form',$data);
     }

@@ -120,7 +120,7 @@ foreach($plcs as $plc) {
     }
 }
 
-echo "*** PLAYER PRODUCTION - Products ***\n";
+echo "*** PLAYER PRODUCTION - Goods ***\n";
 for($rounds=0; $rounds<2; $rounds++) {
     echo "Round: " . $rounds . "\n";
     foreach($plcs as $plc) {
