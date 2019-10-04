@@ -52,6 +52,10 @@ function run_local() {
             //display the form
             $("#travelForm").css("display","block");
         }
+        if (toks[0] == "STORUNIT") {
+            //submit the form
+            $("#storageForm").css("display","block");
+        }
     })
     $("#btn_place_order").mouseup(function(e) {
         //create a market order 
@@ -73,12 +77,27 @@ function run_local() {
             }
         })
     })
+    $("#btn_setup_storage").mouseup(function(e) {
+        //last_id contains the ID of the warehouse, in this case a mean of transport
+        $.get(base_url + "/simulator/setupstorage", function(data){
+            if (data != "OK") { 
+                ShowAlert(data,'Error','',ajax_url + "storage"); 
+            } else {
+                Nav(ajax_url + "storage");
+            }
+        })
+    })
+    
     $("#btn_cancel_order").mouseup(function(e) {
         $("#sellForm").css("display","none");
     })
     $("#btn_cancel_travel").mouseup(function(e) {
         $("#travelForm").css("display","none");
     })
+    $("#btn_cancel_storage").mouseup(function(e) {
+        $("#storageForm").css("display","none");
+    })
+   
 } // run_local    
     
 </script>
@@ -88,28 +107,27 @@ function run_local() {
 if ($place != "") {
     echo heading("You are in $place",3);
 }
+// Label, width of the input field, Read only or not, width of the column (optional)
+$columns = array (
+    array("ID", 50, "RO"),
+    array("Place", 150, "RO"),
+    array("WH", 50, "RO"),
+    array("Description", 100, "RO"),
+    array("Space", 90, "RO"),
+    array("Good", 150, "RO"),
+    array("QTY", 60, "RO", 90),
+    array("Locked", 60, "RO"),
+    array("Type", 90, "RO"),
+    array("", 100)
+);
+$inner = "";
+foreach($columns as $c) {
+    $ww = isset($c[3])?$c[3]:$c[1];
+    $inner .= div($c[0], array("style" => "width:" . $ww . "px", "class" => "row_edit_cell"));
+}
+echo div($inner, array("_style" => "width:1000px"));
 
 if ($list) {
-    // Label, width of the input field, Read only or not, width of the column (optional)
-    
-    $columns = array (
-        array("ID", 50, "RO"),
-        array("Place", 150, "RO"),
-        array("WH", 50, "RO"),
-        array("Description", 100, "RO"),
-        array("Space", 90, "RO"),
-        array("Good", 150, "RO"),
-        array("QTY", 60, "RO", 90),
-        array("Locked", 60, "RO"),
-        array("Type", 90, "RO"),
-        array("", 100)
-    );
-    $inner = "";
-    foreach($columns as $c) {
-        $ww = isset($c[3])?$c[3]:$c[1];
-        $inner .= div($c[0], array("style" => "width:" . $ww . "px", "class" => "row_edit_cell"));
-    }
-    echo div($inner, array("_style" => "width:1000px"));
     
     foreach($list as $item) {
         $c = 0;
@@ -161,7 +179,31 @@ if ($list) {
         //echo form_close();
     }
 }
+if ($place != "") {
+    $inner = button("Setup storage unit", array("ID" => "STORUNIT" , "class" => "act_button"));
+    echo div($inner);
+}
 ?>
+
+<?php
+if ($place != ""):
+// if there's no place set the form is not even drawn
+?>
+<div class="form-popup" id="storageForm">
+  <form class="form-container" autocomplete="off">
+    <h3>Storage unit setup</h3>
+    <?php if($warehouse): ?>
+    You already have <?php echo $warehouse->capacity; ?> units of storage in <?php echo $place; ?>.
+    Do you want to upgrade for 1000G?
+    <?php else: ?>
+    Do you want to buy your first storage point in <?php echo $place; ?> for 1000G?
+    <?php endif; ?>
+    <button type="button" class="btn" id="btn_setup_storage">Yes</button>
+    <button type="button" class="btn cancel" id="btn_cancel_storage">Cancel</button>
+  </form>
+</div>    
+<?php endif; ?>
+
 
 <div class="form-popup" id="sellForm">
   <form class="form-container" autocomplete="off">

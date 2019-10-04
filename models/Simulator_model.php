@@ -93,6 +93,53 @@ class Simulator_model extends CI_Model {
         return $routes;
     }
     
+    public function setup_static_warehouse($id_place, $id_player) {
+        $this->db->trans_begin();
+        // update the current warehouse or create a new one
+        if ($wh = $this->get_static_warehouse($id_place, $id_player)) {
+            $wh->capacity += 1000;
+            $this->db->where("id", $wh->id)->update("warehouses",$wh);
+        } else {
+            $wh = new stdClass();
+            $wh->player_id = $id_player;
+            $wh->place_id = $id_place;
+            $wh->capacity = 1000;
+            $wh->whtype = "STATIC";
+            $this->db->insert("warehouses",$wh);
+        }
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return false;
+        }
+        // execute the payment
+        $this->db->set("gold","gold - 1000", false)
+                    ->where("id",$id_player)
+                    ->where("gold >= 1000")
+                    ->update("players");
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return false;
+        }
+        $this->db->trans_commit();
+        return true;
+    }
+    
+    
+    
+    public function get_static_warehouse($id_place, $id_player) {
+        $item = $this->db->select("*")->from("warehouses")
+                        ->where("player_id",$id_player)
+                        ->where("place_id", $id_place)
+                        ->where("whtype","STATIC")
+                        ->get()->result();
+        if ($item) {
+            return $item[0];
+        } else {
+            return false;
+        }
+        
+    }
+    
     public function get_marketplace_data($id) {
         return $this->db->query("select * from v_marketplace_equiv where id = $id limit 1")
                         ->result()[0];

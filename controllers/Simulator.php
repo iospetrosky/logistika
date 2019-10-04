@@ -129,6 +129,18 @@ class Simulator extends CI_Controller {
         echo json_encode($json);
     }
     
+    public function setupstorage() {
+        //retrieves all the data from cookies and the database
+        //adds space or buys a new storage
+        if($this->simulator_model->setup_static_warehouse($this->input->cookie("market_id"),
+                                                        $this->input->cookie("current_id"))) {
+            echo "OK";
+        } else {
+            echo "Something went wrong!";
+        }
+    }
+    
+    
     
     public function storage(/*...$params*/) {
         //manages the storage of the current selected player
@@ -144,10 +156,13 @@ class Simulator extends CI_Controller {
         $data["list"] = $this->simulator_model->get_storage_of($this->input->cookie("current_id"));
         $routes = $this->simulator_model->get_available_routes($this->input->cookie("market_id"));
         $data["place"] = $this->simulator_model->get_place_name($this->input->cookie("market_id"));
+        //check if the user has a static storage in this place
+        $data["warehouse"] = $this->simulator_model
+                                ->get_static_warehouse($this->input->cookie("market_id"),
+                                                        $this->input->cookie("current_id"));
         if($routes) {
             //transform to an array to be passed to the dropdown list
             $data["routes"] = array();
-            $x = 0;
             foreach($routes as $rt) {
                 $data["routes"][$rt->route_id] = $rt->description;
             }

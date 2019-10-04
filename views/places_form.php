@@ -38,23 +38,23 @@ function run_local() {
 <?php 
 // https://www.codeigniter.com/userguide3/helpers/form_helper.html#
 // https://www.codeigniter.com/userguide3/database/query_builder.html#updating-data
+$columns = array (
+    array("ID", 50),
+    array("Place name", 200),
+    array("Major", 150),
+    array("Population", 90),
+    array("Hex on map", 90),
+    array("Terrain", 90),
+    array("Wrk areas", 90),
+    array("", 100)
+);
+$inner = "";
+foreach($columns as $c) {
+    $inner .= div($c[0], array("style" => "width:" . $c[1] . "px", "class" => "row_edit_cell"));
+}
+echo div($inner);
+
 if ($list) {
-    $columns = array (
-        array("ID", 50),
-        array("Place name", 200),
-        array("Major", 150),
-        array("Population", 90),
-        array("Hex on map", 90),
-        array("Terrain", 90),
-        array("Wrk areas", 90),
-        array("", 100)
-    );
-    $inner = "";
-    foreach($columns as $c) {
-        $inner .= div($c[0], array("style" => "width:" . $c[1] . "px", "class" => "row_edit_cell"));
-    }
-    echo div($inner);
-    
     foreach($list as $item) {
         $c = 0;
         echo form_open("{$bu}/editor/places/save",
@@ -87,11 +87,10 @@ if ($list) {
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
         echo form_close();
     }
-    
-    $inner = button("new", array("ID" => "NEW" , "class" => "act_button"));
-    echo div($inner);
-    
 }
+
+$inner = button("new", array("ID" => "NEW" , "class" => "act_button"));
+echo div($inner);
 ?>
     
     
