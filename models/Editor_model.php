@@ -112,15 +112,16 @@ class Editor_model extends CI_Model {
     }
 
     //************************************************************************
-    public function save_prodpoint($data) {
-        $this->save_data("productionpoints",$data);
+    public function save_prodpoint_type($data) {
+        unset($data['mat_needed']); //this is a fake field, managed in a related table
+        $this->save_data("prodpoint_types",$data);
     }
-    public function new_prodpoint() {
-        $this->new_data("productionpoints","rnd_order","1");
+    public function new_prodpoint_type() {
+        $this->new_data("prodpoint_types","pptype","AAA NEW TYPE");
     }
-    public function delete_prodpoint($id) {
+    public function delete_prodpoint_type($id) {
         if ($id == 0) return;
-        $this->delete_data("productionpoints", $id);
+        $this->delete_data("prodpoint_types", $id);
     }
 
     //************************************************************************

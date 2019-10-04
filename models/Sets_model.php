@@ -5,10 +5,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Sets_model extends CI_Model {
 
-    public function __construct()    {
+    public function __construct() {
         //$this->load->database(); // autoloaded
     }
 
+    public function prdpt_mat_needed($id) {
+        $query = $this->db->select("*")->from("prodpoint_reqmaterials")
+                            ->where("pp_id",$id)
+                            ->get();
+        return $query->result();   
+    }
+    
     public function get_human_players() {
         $query = $this->db->select('id, fullname')
                             ->from('players')
@@ -70,7 +77,15 @@ class Sets_model extends CI_Model {
                           ->order_by("ID")
                           ->get();    
         return $query->result();
+    }
 
+    public function prodpoints_types_list() {
+        $query = $this->db->select("*")
+                          ->from('prodpoint_types')
+                          ->order_by("pptype ASC")
+                          ->where("conv_cost < 99999999999")
+                          ->get();    
+        return $query->result();
     }
     
     public function get_prodpoint_types() {

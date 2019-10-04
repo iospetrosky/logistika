@@ -111,31 +111,27 @@ class Editor extends CI_Controller {
     {   
         switch($action) {
             case 'save':
-                $this->editor_model->save_prodpoint($this->input->post(NULL,false));
+                $this->editor_model->save_prodpoint_type($this->input->post(NULL,false));
                 break;
             case 'new':
-                $this->editor_model->new_prodpoint();
+                $this->editor_model->new_prodpoint_type();
                 break;
             case 'del':
-                $this->editor_model->delete_prodpoint($id);
+                $this->editor_model->delete_prodpoint_type($id);
                 break;
         }
         
 
-        $data['list'] = $this->sets_model->productionpoints_list(); 
-        // these are for the dropdown boxes
-        $data['players'] = array();
-        $data['goods'] = array();
-        $data['places'] = array();
-
-        foreach($this->sets_model->players_list() as $xx) {
-            $data['players'][$xx->id] = $xx->fullname;
+        $data['list'] = $this->sets_model->prodpoints_types_list(); 
+        foreach($data['list'] as &$item) {
+            //load the materials needed 
+            $item->mat_needed = $this->sets_model->prdpt_mat_needed($item->id);
         }
+        // these are for the dropdown boxes
+        $data['goods'] = array();
+
         foreach($this->sets_model->goods_list() as $xx) {
             $data['goods'][$xx->id] = $xx->gname;
-        }
-        foreach($this->sets_model->places_list() as $xx) {
-            $data['places'][$xx->id] = $xx->pname;
         }
         $this->index();
         $this->load->view('prodpoints_form',$data);

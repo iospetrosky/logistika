@@ -4,9 +4,8 @@ $bu = config_item('base_url') . '/' . config_item('index_page');
 $ajax = $bu . "/xxx/";
 ?>
 <script type='text/javascript'>
-var base_url = "<?php echo $bu; ?>"
+//var base_url = "<?php echo $bu; ?>"
 var ajax_url = "<?php echo $ajax; ?>" 
-
 
 function run_local() {
     $(".act_button").mouseup(function(e) {
@@ -30,7 +29,17 @@ function run_local() {
         var id = $(this).attr("ID").split("_")[1]
         $("#line_"+id).addClass("row_edited")
     })
-            
+    
+    $(".editable2").change(function(e) {
+        var id = $(this).attr("ID").split("@")[1]
+        var fld = $(this).attr("ID").split("@")[0]
+        //fire and forget
+        $.get(base_url + "/FE/A/" + id, 
+                    {'table'   : 'prodpoint_reqmaterials', 
+                        'field'  : fld, 
+                        'newval' : $(this).val()
+                    })
+    })
 } // run_local    
     
 </script>
@@ -39,12 +48,9 @@ function run_local() {
 if ($list) {
     $columns = array (
         array("ID", 50),
-        array("Order", 70),
-        array("Player", 150),
-        array("Good", 150),
-        array("Place", 150),
-        array("Active", 90),
-        array("Level", 60),
+        array("Prod. point type", 180),
+        array("Conversion cost", 70),
+        array("Materials needed to build", 200),
         array("", 100)
     );
     $inner = "";
@@ -59,34 +65,52 @@ if ($list) {
                         array("ID" => "form_" . $item->id),
                         array("row_id" => $item->id));
         $inner = "";
-        foreach($item as $f=>$v) {
-            $data = array(
-                "name" => $f,
-                "id" => $f . "_" . $item->id,
-                "value" => $v,
+        foreach($item as $fld=>$val) {
+            $fldformat = array(
+                "name" => $fld,
+                "id" => $fld . "_" . $item->id,
+                "value" => $val,
                 "class" => "editable",
                 "style" => "width:" . (string)($columns[$c][1]-20) . "px"
             );
-            // some fields must be rendered differently
-            if ($f == "active") {
-                $html = form_dropdown($f,array("1"=>"Active", "0"=>"Inactive"),$v,$data);
-            } elseif ($f == 'id_player') {
-                $html = form_dropdown($f,$players,$v,$data);
-            } elseif ($f == 'id_good') {
-                $html = form_dropdown($f,$goods,$v,$data);
-            } elseif ($f == 'id_place') {
-                $html = form_dropdown($f,$places,$v,$data);
-            } else {
-                //$data["class"] = "editable";
-                $html = form_input($data);
+            switch($fld) {
+                case 'mat_needed':
+                    $in2 = "";
+                    $html = "";
+                    foreach($val as $it2) {
+                        foreach($it2 as $f2=>$v2) {
+                            $fldformat = array(
+                                "name" => $f2,
+                                "id" => $f2 . "@" . $it2->id,
+                                "value" => $v2,
+                                "class" => "editable2",
+                                "style" => "width:80px"
+                            );
+                            switch($f2) {
+                                case 'mat_id':
+                                    $html .= form_dropdown($f2,$goods,$v2,$fldformat);
+                                    break;
+                                case 'quantity':
+                                    $html .= form_input($fldformat);
+                                    break;
+                                default:
+                                    //skip field
+                            }
+                        }
+                    }
+                    //put a new button
+                    //$html = print_r($val,true);
+                    break;
+                default:
+                    $html = form_input($fldformat);
             }
-            $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
+            $inner .= div($html, array("style" => ";vertical-align:top; width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
             $c++;
         }
         $but = button("save", array("ID" => "SAVE_" . $item->id, "class" => "act_button"));
         $but.= button("del", array("ID" => "DEL_" . $item->id, "class" => "act_button"));
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
-        echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
+        echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE", "style" => "border-bottom:1px dotted black"));
         echo form_close();
     }
     

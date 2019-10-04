@@ -28,6 +28,9 @@ function ShowAlert(atext, atitle = 'Warning', afooter = '', redir = '') {
 
 $(document).ready(function () {
     // do global stuff
+    $("input").attr("autocomplete", "off"); // no autocomplete on every page
+    
+
     $(".close, .modal").click(function() {
         $("#myModal").fadeOut(200)
         if (redir_after_modal != '') {
