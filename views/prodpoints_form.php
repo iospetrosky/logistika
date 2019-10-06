@@ -99,7 +99,7 @@ if ($list) {
                         }
                     }
                     //put a new button
-                    //$html = print_r($val,true);
+                    $html .= button("new mat", array("ID" => "NEWMAT_" . $item->id, "class" => "act_button"));
                     break;
                 default:
                     $html = form_input($fldformat);
