@@ -88,10 +88,6 @@ foreach($columns as $c) {
 echo div($inner, array("_style" => "width:1000px"));
 
 if ($list) {
-    echo anchor($bu . "/display/map/showtransp/" . get_cookie("current_id"),"Show on map");
-    echo br();
-    
-    
     foreach($list as $item) {
         $c = 0;
         $inner = "";
@@ -123,6 +119,9 @@ if ($list) {
         echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
         //echo form_close();
     }
+
+    echo anchor($bu . "/display/map/showtransp/" . get_cookie("current_id"),"Show on map");
+    echo br();
 }
 if($current_location = get_cookie("market_id")) {
     $inner = button("new", array("ID" => "NEW" , "class" => "act_button"));
@@ -154,8 +153,5 @@ if($current_location = get_cookie("market_id")) {
     <button type="button" class="btn cancel" id="btn_cancel">Cancel</button>
   </form>
 </div>    
-    
-    
-    
 </body>
 </html>    

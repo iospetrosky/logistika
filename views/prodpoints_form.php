@@ -16,13 +16,15 @@ function run_local() {
             $("#form_" + toks[1]).submit();
         }
         if (toks[0] == "DEL") {
-            //set a dedicated link
             window.location.href = base_url + "/editor/prodpoints/del/" + toks[1]
         }
         if (toks[0] == "NEW") {
-            //set a dedicated link
             window.location.href = base_url + "/editor/prodpoints/new"
         }
+        if (toks[0] == "NEWMAT") {
+            window.location.href = base_url + "/editor/prodpoints/newmat/" + toks[1]
+        }
+        
     })
 
     $(".editable").change(function(e) {

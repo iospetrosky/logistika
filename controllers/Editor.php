@@ -119,6 +119,9 @@ class Editor extends CI_Controller {
             case 'del':
                 $this->editor_model->delete_prodpoint_type($id);
                 break;
+            case 'newmat':
+                $this->editor_model->new_prodpoint_mat($id);
+                break;
         }
         
 
