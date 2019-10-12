@@ -136,7 +136,8 @@ endif;
     elseif ($url[0] == "simulator"):
         $links = array( "marketplace" => "Marketplace",
                         "storage" => "Storage",
-                        "fleet" => "Fleet manager"
+                        "fleet" => "Fleet manager",
+                        "prodpoints" => "Prod. points"
                         );
     else:
         $links = array("editor" => "Editor",

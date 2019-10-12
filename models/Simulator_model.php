@@ -124,7 +124,13 @@ class Simulator_model extends CI_Model {
         return true;
     }
     
-    
+    public function get_player_prodpoints($id_player, $id_place) {
+        return $this->db->select("pp.id, pp.id_good, pp.active, pp.plevel")
+                        ->from("productionpoints pp")
+                        ->where("id_player", $id_player)
+                        ->where("id_place", $id_place)
+                        ->get()->result();
+    }
     
     public function get_static_warehouse($id_place, $id_player) {
         $item = $this->db->select("*")->from("warehouses")

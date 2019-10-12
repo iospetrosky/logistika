@@ -111,5 +111,14 @@ class Sets_model extends CI_Model {
                         ->get();
         return $query->result();
     }
+
+    public function get_available_prodpoints() {
+        $query = $this->db->select("id, pptype")
+                        ->from("prodpoint_types ppt")
+                        ->order_by("pptype asc")
+                        ->join("prodpoint_reqmaterials","pp_id = ppt.id")
+                        ->get();
+        return $query->result();
+    }
 }
     

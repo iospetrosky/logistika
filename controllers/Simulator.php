@@ -140,7 +140,20 @@ class Simulator extends CI_Controller {
         }
     }
     
-    
+    public function prodpoints(...$params) {
+        $data["url"] = explode("/", $this->uri->uri_string());
+        $data["list"] = $this->simulator_model->get_player_prodpoints($this->input->cookie("current_id"),
+                                                                        $this->input->cookie("market_id"));
+        $data["place"] = $this->simulator_model->get_place_name($this->input->cookie("market_id"));
+        $pptypes = $this->sets_model->get_available_prodpoints();
+        $data["pptypes"] = array();
+        foreach($pptypes as $rt) {
+            $data["pptypes"][$rt->id] = $rt->pptype;
+        }
+
+        $this->load->view('intro',$data);
+        $this->load->view('userprodpoints_form',$data);
+    }
     
     public function storage(/*...$params*/) {
         //manages the storage of the current selected player
