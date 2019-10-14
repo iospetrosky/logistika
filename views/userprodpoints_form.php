@@ -32,7 +32,14 @@ function run_local() {
         $("#line_"+id).addClass("row_edited")
     })
     */
-            
+    
+
+    $("#dd_prodpoint").change(function(e) {
+        //alert($(this).val());
+        //get the required materials from the DB
+        //activate the create button if materials are enough
+        
+    })
 } // run_local    
     
 </script>
@@ -55,12 +62,9 @@ if ($list) {
     
     foreach($list as $item) {
         $c = 0;
-        echo form_open("{$bu}/editor/prod_wf/save",
-                        array("ID" => "form_" . $item->id),
-                        array("row_id" => $item->id));
         $inner = "";
         foreach($item as $f=>$v) {
-            $data = array(
+            $data = array (
                 "name" => $f,
                 "id" => $f . "_" . $item->id,
                 "value" => $v,
@@ -68,10 +72,8 @@ if ($list) {
                 "style" => "width:" . (string)($columns[$c][1]-20) . "px"
             );
             // some fields must be rendered differently
-            if ($f == 'id_good') {
-                $html = form_dropdown($f,$goods,$v,$data);
-            } elseif ($f == 'req_good') {
-                $html = form_dropdown($f,$goods,$v,$data);
+            if ($f == 'pptype') {
+                $html = form_dropdown($f,$pptypes,$v,$data);
             } else {
                 //$data["class"] = "editable";
                 $html = form_input($data);
@@ -79,14 +81,11 @@ if ($list) {
             $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
             $c++;
         }
-        $but = button("save", array("ID" => "SAVE_" . $item->id, "class" => "act_button"));
-        $but.= button("del", array("ID" => "DEL_" . $item->id, "class" => "act_button"));
-        $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
-        echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
-        echo form_close();
     }
 }
-$inner = button("new", array("ID" => "NEW" , "class" => "act_button"));
+$inner = button("new", array("ID" => "NEW" , "class" => "act_button", "disabled" => "disabled")) .
+            form_dropdown('dd_prodpoint',$pptypes,'0', array("id"=>"dd_prodpoint"));
+
 echo div($inner);
 ?>
 </body>

@@ -146,7 +146,7 @@ class Simulator extends CI_Controller {
                                                                         $this->input->cookie("market_id"));
         $data["place"] = $this->simulator_model->get_place_name($this->input->cookie("market_id"));
         $pptypes = $this->sets_model->get_available_prodpoints();
-        $data["pptypes"] = array();
+        $data["pptypes"] = array("0" => "Undefined");
         foreach($pptypes as $rt) {
             $data["pptypes"][$rt->id] = $rt->pptype;
         }
