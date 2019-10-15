@@ -165,6 +165,19 @@ class Simulator extends CI_Controller {
     }
     
     public function prodpoints(...$params) {
+        if(sizeof($params) > 0) {
+            switch($params[0]) {
+                case 'new':
+                    $this->simulator_model->new_production_point($params[1],
+                                                                 $this->input->cookie("current_id"),
+                                                                 $this->input->cookie("market_id"));
+                    break;
+            }
+        }
+        
+        
+        
+        // the default behaviour after the possible activities
         $data["url"] = explode("/", $this->uri->uri_string());
         $data["list"] = $this->simulator_model->get_player_prodpoints($this->input->cookie("current_id"),
                                                                         $this->input->cookie("market_id"));
@@ -179,15 +192,7 @@ class Simulator extends CI_Controller {
         $this->load->view('userprodpoints_form',$data);
     }
     
-    public function storage(/*...$params*/) {
-        //manages the storage of the current selected player
-        /*
-        if(sizeof($params) > 0) {
-            //switch($params[0]) {
-                print_r($params);
-            //}
-        }
-        */
+    public function storage() {
         //finally get the storage and return it
         $data["url"] = explode("/", $this->uri->uri_string());
         $data["list"] = $this->simulator_model->get_storage_of($this->input->cookie("current_id"));

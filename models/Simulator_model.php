@@ -50,6 +50,13 @@ class Simulator_model extends CI_Model {
         return $res;
     }
     
+    public function new_production_point($pp_id, $player_id, $place_id) {
+        $this->db->set("id_player", $player_id)
+                 ->set("id_place", $place_id)
+                 ->set("pptype_id", $pp_id)
+                 ->insert("productionpoints");
+    }
+    
     public function get_storage_of($id) {
         $query = $this->db->select("id, pname,id_whouse,coalesce(transpname,'Warehouse') as whname, capacity,gname,avail_quantity,locked,whtype")
                             ->from('v_player_warehouses_goods')

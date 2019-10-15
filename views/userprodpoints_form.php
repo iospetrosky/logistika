@@ -4,15 +4,14 @@ $bu = config_item('base_url') . '/' . config_item('index_page');
 $ajax = $bu . "/simulator/";
 ?>
 <script type='text/javascript'>
-var base_url = "<?php echo $bu; ?>"
+//var base_url = "<?php echo $bu; ?>"
 var ajax_url = "<?php echo $ajax; ?>" 
 
 
 function run_local() {
-    /*
     $(".act_button").mouseup(function(e) {
-        //alert($(this).attr("ID"))
         var toks = $(this).attr("ID").split("_")
+/*
         if (toks[0] == "SAVE") {
             //submit the form
             $("#form_" + toks[1]).submit();
@@ -21,9 +20,9 @@ function run_local() {
             //set a dedicated link
             window.location.href = base_url + "/editor/prod_wf/del/" + toks[1]
         }
+*/
         if (toks[0] == "NEW") {
-            //set a dedicated link
-            window.location.href = base_url + "/editor/prod_wf/new"
+            window.location.href = ajax_url + "/prodpoints/new/" + $("#dd_prodpoint").val()
         }
     })
 
@@ -31,7 +30,6 @@ function run_local() {
         var id = $(this).attr("ID").split("_")[1]
         $("#line_"+id).addClass("row_edited")
     })
-    */
 
     $("#dd_prodpoint").change(function(e) {
         //alert($(this).val());
@@ -71,7 +69,6 @@ foreach($columns as $c) {
 echo div($inner);
 
 if ($list) {
-    
     foreach($list as $item) {
         $c = 0;
         $inner = "";
