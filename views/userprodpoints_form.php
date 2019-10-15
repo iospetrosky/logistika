@@ -1,7 +1,7 @@
 
 <?php
 $bu = config_item('base_url') . '/' . config_item('index_page');
-$ajax = $bu . "/xxx/";
+$ajax = $bu . "/simulator/";
 ?>
 <script type='text/javascript'>
 var base_url = "<?php echo $bu; ?>"
@@ -32,14 +32,26 @@ function run_local() {
         $("#line_"+id).addClass("row_edited")
     })
     */
-    
 
     $("#dd_prodpoint").change(function(e) {
         //alert($(this).val());
+        $("#NEW").prop("disabled", true)
         //get the required materials from the DB
-        //activate the create button if materials are enough
-        
+        $.get(ajax_url + "checkprodpoint/" + $("#dd_prodpoint").val(), function(data) {
+            data = $.parseJSON(data)
+            //put the result text in the message span
+            $("#new_prodpoint").html(data.message)
+            //activate the Create button if materials are enough
+            if (data.result == "OK") {
+                $("#NEW").prop("disabled", false)
+            }
+        })
+
     })
+    
+    
+    $("#NEW").prop("disabled", true)
+    
 } // run_local    
     
 </script>
@@ -83,8 +95,9 @@ if ($list) {
         }
     }
 }
-$inner = button("new", array("ID" => "NEW" , "class" => "act_button", "disabled" => "disabled")) .
-            form_dropdown('dd_prodpoint',$pptypes,'0', array("id"=>"dd_prodpoint"));
+$inner = button("new", array("ID" => "NEW" , "class" => "act_button")) .
+            form_dropdown('dd_prodpoint',$pptypes,'0', array("id"=>"dd_prodpoint")) . 
+            span("",array("id"=>"new_prodpoint"));
 
 echo div($inner);
 ?>

@@ -47,6 +47,30 @@ class Simulator extends CI_Controller {
         }
     }
     
+    public function checkprodpoint($pp_id) {
+        $materials = $this->simulator_model->check_prodpoint_requisites($pp_id,
+                                                                        $this->input->cookie("current_id"),
+                                                                        $this->input->cookie("market_id")
+                                                                        );
+        $json = new stdClass();
+        $lines = array();
+        $json->result = 'OK';
+        foreach($materials as $mat) {
+            if($mat->avail_quantity < $mat->need_quantity) {
+                $l = "<font color=red>";
+                $json->result = 'KO';
+            } else {
+                $l = "<font color=green>";
+            }
+            $l .= "<B>" . $mat->gname . "</b> Av: " . $mat->avail_quantity . " Rq: " . $mat->need_quantity;
+            $l .= "</font>";
+            $lines[] = $l;
+        }
+        $json->message = implode(" - ", $lines);
+        echo json_encode($json);
+    }
+    
+    
     public function createtransport() {
         $user_id = $this->input->cookie("current_id");
         $place_id = $this->input->cookie("market_id");

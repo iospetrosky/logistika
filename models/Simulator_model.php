@@ -24,6 +24,32 @@ class Simulator_model extends CI_Model {
         return $query->result();
     }
     
+    public function check_prodpoint_requisites($pp_id, $player_id, $place_id) {
+        //checks if the player has enough materials in this place to build a production point
+        $query = $this->db->select("ppr.mat_id, g.gname, ppr.quantity as need_quantity, 0 as avail_quantity")
+                            ->from("prodpoint_reqmaterials ppr")
+                            ->join("goods g","g.id = ppr.mat_id")
+                            ->where("ppr.pp_id",$pp_id)
+                            ->get();
+        //echo $this->db->last_query() . "<HR>";
+        $res = $query->result();
+        foreach($res as &$item) {
+            //search if the player has the material
+            $qts = $this->db->select("(wg.quantity-wg.locked) as avail_quantity")
+                                ->from("warehouses_goods wg")
+                                ->join("warehouses w", "w.id = wg.id_warehouse")
+                                ->where("id_good", $item->mat_id)
+                                ->where("w.player_id", $player_id)
+                                ->where("w.place_id", $place_id)
+                                ->where("w.whtype = 'STATIC'")
+                                ->get()->result();
+            if($qts) {
+                $item->avail_quantity = $qts[0]->avail_quantity;
+            }
+        }
+        return $res;
+    }
+    
     public function get_storage_of($id) {
         $query = $this->db->select("id, pname,id_whouse,coalesce(transpname,'Warehouse') as whname, capacity,gname,avail_quantity,locked,whtype")
                             ->from('v_player_warehouses_goods')
