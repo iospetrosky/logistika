@@ -101,6 +101,25 @@ class Editor_model extends CI_Model {
     }
 
     //************************************************************************
+    //prodpoint editing - major version (since players do it via the simulator)
+    public function new_prodpoint_major() {
+        // cheating on the fact that player 1 is Tyrsis major
+        $this->new_data("productionpoints","id_player","1");
+    }
+    public function save_prodpoint_major($data) {
+        //collect id_place and pptype_id that are not in the form
+        //for major prod points the relationship is 1-1
+        $data['id_place'] = $this->db->select("id")->from("places")
+                                   ->where("major",$data['id_player'])
+                                   ->get()->result()[0]->id;
+//        echo $this->db->last_query();
+        $data['pptype_id'] = $this->db->select("pptype_req as id")->from("goods")
+                                   ->where("id",$data['id_good'])
+                                   ->get()->result()[0]->id;
+        $this->save_data("productionpoints",$data);                    
+    }
+    
+    //************************************************************************
     public function save_prodpoint_type($data) {
         unset($data['mat_needed']); //this is a fake field, managed in a related table
         $this->save_data("prodpoint_types",$data);

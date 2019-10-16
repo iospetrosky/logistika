@@ -124,6 +124,7 @@ endif;
                        "wh_goods" => "Warehouse goods",
                        "places" => "Places",
                        "prodpoints" => "Prod. points",
+                       "prodptmajors" => "Prod. points majors",
                        "prod_wf" => "Prod. workflows",
                        "equivalent" => "Equivalent",
                        "goods" => "Goods",

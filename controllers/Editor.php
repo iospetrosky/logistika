@@ -107,6 +107,42 @@ class Editor extends CI_Controller {
         $this->load->view('places_form',$data);
     }
 
+    public function prodptmajors($action = false, $id = false)
+    {   
+        switch($action) {
+            case 'save':
+                $this->editor_model->save_prodpoint_major($this->input->post(NULL,false));
+                break;
+            case 'new':
+                $this->editor_model->new_prodpoint_major(); 
+                break;
+            case 'del':
+                $this->editor_model->delete_place($id);
+                break;
+        }
+        $data['list'] = $this->sets_model->prodpoints_majors_list(); 
+        $data['majors'] = array();
+        $data['goods'] = array();
+        //$data['places'] = array();
+        foreach($this->sets_model->majors_list() as $item) {
+            $data['majors'][$item->id] = $item->fullname;
+        }
+        /*foreach($this->sets_model->places_list() as $item) {
+            $data['places'][$item->id] = $item->pname;
+        }*/
+        foreach($this->sets_model->basic_goods() as $item) {
+            $data['goods'][$item->id] = $item->description;
+        }
+        
+        
+        
+        
+        $this->index();
+        $this->load->view('prodptmajors_form',$data);
+    }
+    
+    
+    
     public function prodpoints($action = false, $id = false)
     {   
         switch($action) {

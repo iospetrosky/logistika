@@ -23,6 +23,13 @@ class Sets_model extends CI_Model {
                             ->get();
         return $query->result();
     }
+    public function get_ai_players() {
+        $query = $this->db->select('id, fullname')
+                            ->from('players')
+                            ->where('ptype','AI')
+                            ->get();
+        return $query->result();
+    }
     
     public function majors_list() {
         $query = $this->db->select("id, fullname")
@@ -47,6 +54,16 @@ class Sets_model extends CI_Model {
                           ->get();    
         return $query->result();
     }
+    
+    public function basic_goods() {
+        //only goods from 999999 conv_cost
+        $query = $this->db->select("g.id, g.description")
+                          ->from("goods g")
+                          ->join("prodpoint_types pt","g.pptype_req = pt.id and conv_cost = 999999")
+                          ->order_by("g.description asc")
+                          ->get();
+        return $query->result();
+    }
 
     public function prod_wf_list() {
         $query = $this->db->select("*")
@@ -67,6 +84,16 @@ class Sets_model extends CI_Model {
     public function places_list() {
         $query = $this->db->select("id, pname, major, population, hexmap, ptype, avail_areas")
                           ->from('places')
+                          ->get();    
+        return $query->result();
+    }
+    
+    public function prodpoints_majors_list() {
+        $query = $this->db->select("pp.id, pp.id_player, pp.id_good, pp.active, pp.plevel")
+                          ->from('productionpoints pp')
+                          ->join('players y', "y.id = pp.id_player")
+                          ->where('y.ptype','AI')
+                          ->order_by("ID")
                           ->get();    
         return $query->result();
     }
