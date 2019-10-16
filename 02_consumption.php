@@ -27,13 +27,14 @@ foreach($rows as $r) {
     // most important there must be food otherwise the population drops
     $food_avail = $db->query_field("select quantity as P1 from warehouses_goods where id_warehouse = $cwh and id_good = " . FOOD );
     if ($food_avail >= $r->population/ROUNDS) {
-        $db->beginTransaction();
+        //$db->beginTransaction();
         $sql = "update warehouses_goods set quantity = quantity - ? where id_warehouse = ? and id_good = ?";
         $db->exec_prepared($sql,array($r->population/ROUNDS,$cwh,FOOD));
-        $db->exec_prepared($sql,array($mult*IRON_XROUND,$cwh,IRON));
-        $db->exec_prepared($sql,array($mult*WOOD_XROUND,$cwh,WOOD));
-        // alla peggio wood e iron vanno sotto zero e sistemo in coda
-        $db->commit();
+        //UPDATE: since majors start to sell the raw materials, these are not consumed
+        //also id does not make much sense in terms of the game
+        //$db->exec_prepared($sql,array($mult*IRON_XROUND,$cwh,IRON));
+        //$db->exec_prepared($sql,array($mult*WOOD_XROUND,$cwh,WOOD));
+        //$db->commit();
     } else {
         // not enough food -> population decrease
         echo "Population decrease\n";
@@ -42,8 +43,8 @@ foreach($rows as $r) {
         $c = $db->exec("update places set population = population-100 where id = {$r->id} and population > 100");
         $sql = "update warehouses_goods set quantity = quantity - ? where id_warehouse = ? and id_good = ?";
         $db->exec_prepared($sql,array($r->population/ROUNDS,$cwh,FOOD));
-        $db->exec_prepared($sql,array($mult*IRON_XROUND,$cwh,IRON));
-        $db->exec_prepared($sql,array($mult*WOOD_XROUND,$cwh,WOOD));
+        //$db->exec_prepared($sql,array($mult*IRON_XROUND,$cwh,IRON));
+        //$db->exec_prepared($sql,array($mult*WOOD_XROUND,$cwh,WOOD));
         $db->commit();
         // raise buy price for goods
     }

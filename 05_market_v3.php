@@ -105,7 +105,11 @@ SQL;
         $mkt->op_type = 'B'; //buy
         $mkt->op_scope = 'L'; //Local
         
-        $goods = array(FOOD,WOOD,IRON);
+        /* Since majors trade the raw materials they produce, they don't buy them anymore
+           since these are also not consumed at each turn. Cities consume only food  */
+        
+        //$goods = array(FOOD,WOOD,IRON);
+        $goods = array(FOOD);
         $this->beginTransaction();
         
         foreach($goods as $g) {
@@ -113,8 +117,8 @@ SQL;
                                         "id_place = {$place->id} and id_good = $g and id_player = {$place->major}");
             switch($g) {
                 case FOOD: $mkt->quantity = $place->population * 12 - $avail; break;
-                case IRON: $mkt->quantity = IRON_XROUND * 12 - $avail; break;
-                case WOOD: $mkt->quantity = WOOD_XROUND * 12 - $avail; break;
+                //case IRON: $mkt->quantity = IRON_XROUND * 12 - $avail; break;
+                //case WOOD: $mkt->quantity = WOOD_XROUND * 12 - $avail; break;
                 default: $mkt->quantity = 0;
             }
             $mkt->id_good = $g;
@@ -137,6 +141,9 @@ SQL;
         $mkt->op_scope = 'L'; //Local
         
         $this->beginTransaction();
+        /*
+        For growth we still have the buy orders of prime materials (because not every city produces everything)
+        */
         $goods = array(FOOD,WOOD,IRON,BRICK);
         foreach($goods as $g) {
             $avail = $this->query_field("select avail_quantity as P1 from v_major_warehouses_goods where " . 
@@ -174,7 +181,7 @@ $places = $db->query("select * from places");
 
 echo "*** GROWTH ORDERS ***\n";
 foreach($places as $place) {
-    $db->exec("delete from marketplace where id_place = {$place->id} and id_player = {$place->major}");
+    $db->exec("delete from marketplace where id_place = {$place->id} and id_player = {$place->major} and op_type = 'B'");
     
     $workers = $db->get_workers_place($place->id);
     echo sprintf("%s population %d workers %d\n", $place->pname, $place->population, $workers);
@@ -182,6 +189,14 @@ foreach($places as $place) {
         $db->place_growth_buy_orders($place);
     }
     $db->place_non_starving_orders($place);
+}
+
+/*
+The major places sell orders for goods (not FOOD) that are produced by the city
+*/
+echo "*** SURPLUS ORDERS ***\n";
+foreach($places as $place) {
+
 }
 
 // Stock market style loop
