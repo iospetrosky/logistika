@@ -93,7 +93,7 @@ class Sets_model extends CI_Model {
                           ->from('productionpoints pp')
                           ->join('players y', "y.id = pp.id_player")
                           ->where('y.ptype','AI')
-                          ->order_by("ID")
+                          ->order_by('pp.id')
                           ->get();    
         return $query->result();
     }
@@ -110,7 +110,7 @@ class Sets_model extends CI_Model {
         $query = $this->db->select("*")
                           ->from('prodpoint_types')
                           ->order_by("pptype ASC")
-                          ->where("conv_cost < 99999999999")
+                          ->where("conv_cost < 999999")
                           ->get();    
         return $query->result();
     }
@@ -126,7 +126,7 @@ class Sets_model extends CI_Model {
     public function traderoutes_list() {
         $query = $this->db->select("id, description, starthex, endhex, hexlength, hexcost, traveltype")
                         ->from("traderoutes")
-                        ->order_by("ID")
+                        ->order_by("id")
                         ->get();
         return $query->result();
     }
