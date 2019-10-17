@@ -203,24 +203,25 @@ IF there's no BUY order for the same material (meaning that it's needed so don't
 echo "*** MAJOR SURPLUS ORDERS ***\n";
 foreach($places as $place) {
     $maj_wh = $db->query_field("select id as P1 from warehouses where player_id = {$place->major} and place_id = {$place->id}");
-    $goods = $db->query("select wg.id, wg.id_good, wg.quantity from warehouses_goods wg, " .
-                                "g.gname, g.plains_prices as price " . 
+    $goods = $db->query("select wg.id, wg.id_good, wg.quantity, g.gname, g.plains_prices as price " .
+                        "from warehouses_goods wg" . 
                         "inner join goods g on wg.id_good = g.id " . 
                         "where wg.id_warehouse = $maj_wh and wg.id_good <> 1 and wg.quantity > 100");
     $order = new stdClass();
     $order->id_place = $place->id;
     $order->id_player = $place->major;
     $order->op_type = 'S';
-    
-    $db->beginTransaction();
-    foreach($goods as $good) {
-        $order->id_good = $good->id_good;
-        $order->quantity = $good->quantity - 100;
-        $order->price = $good->price;
-        $db->insert_object('marketplace',$order);
-        $db->exec(sprintf("update warehouses_goods set locked = %s where id = %s",$order->quantity,$good->id));
-        echo "order bla bla bla"
-        
+    if ($goods) {
+        $db->beginTransaction();
+        foreach($goods as $good) {
+            $order->id_good = $good->id_good;
+            $order->quantity = $good->quantity - 100;
+            $order->price = $good->price;
+            echo "Major {$place->major} ordering {$order->quantity} {$good->gname} \n";
+            $db->insert_object('marketplace',$order);
+            $db->exec(sprintf("update warehouses_goods set locked = %s where id = %s",$order->quantity,$good->id));
+        }
+        $db->commit();
     }
 }
 
