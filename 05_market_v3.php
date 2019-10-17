@@ -182,6 +182,11 @@ $places = $db->query("select * from places");
 echo "*** GROWTH ORDERS ***\n";
 foreach($places as $place) {
     $db->exec("delete from marketplace where id_place = {$place->id} and id_player = {$place->major} and op_type = 'B'");
+    // also delete all the SELL orders that will be reinserted
+    // and restore all the locked materials
+    $maj_wh = $db->query_field("select id as P1 from warehouses where player_id = {$place->major} and place_id = {$place->id}");
+    $db->exec("delete from marketplace where id_place = {$place->id} and id_player = {$place->major} and op_type = 'S'");
+    $db->exec("update warehouses_goods set locked = 0 where id_warehouse = $maj_wh and locked <> 0");
     
     $workers = $db->get_workers_place($place->id);
     echo sprintf("%s population %d workers %d\n", $place->pname, $place->population, $workers);
@@ -193,10 +198,30 @@ foreach($places as $place) {
 
 /*
 The major places sell orders for goods (not FOOD) that are produced by the city
+IF there's no BUY order for the same material (meaning that it's needed so don't sell the storage)
 */
-echo "*** SURPLUS ORDERS ***\n";
+echo "*** MAJOR SURPLUS ORDERS ***\n";
 foreach($places as $place) {
-
+    $maj_wh = $db->query_field("select id as P1 from warehouses where player_id = {$place->major} and place_id = {$place->id}");
+    $goods = $db->query("select wg.id, wg.id_good, wg.quantity from warehouses_goods wg, " .
+                                "g.gname, g.plains_prices as price " . 
+                        "inner join goods g on wg.id_good = g.id " . 
+                        "where wg.id_warehouse = $maj_wh and wg.id_good <> 1 and wg.quantity > 100");
+    $order = new stdClass();
+    $order->id_place = $place->id;
+    $order->id_player = $place->major;
+    $order->op_type = 'S';
+    
+    $db->beginTransaction();
+    foreach($goods as $good) {
+        $order->id_good = $good->id_good;
+        $order->quantity = $good->quantity - 100;
+        $order->price = $good->price;
+        $db->insert_object('marketplace',$order);
+        $db->exec(sprintf("update warehouses_goods set locked = %s where id = %s",$order->quantity,$good->id));
+        echo "order bla bla bla"
+        
+    }
 }
 
 // Stock market style loop
