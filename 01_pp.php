@@ -74,8 +74,9 @@ foreach($rows as $r) {
         $curr = $r->id_place;
         $cwh = $db->query_field("select id_whouse as P1 from v_places_whouse_players where id_place=$curr and ptype='AI'");
         if (!$cwh) {
-            echo "No warehouse for the major of {$r->pname}\n";
-            die();
+            echo "No warehouse for the major of {$r->pname} ... creating one\n";
+            
+            die("Stopped due to newly created warehouse for a major");
         } else {
             echo "Switching to warehouse $cwh \n";
         }
@@ -89,7 +90,7 @@ $plcs = $db->query("select id, pname, population, ptype from places");
 foreach($plcs as $plc) {
     // randomize the order of production
     $db->exec("update productionpoints set rnd_order = FLOOR(RAND() * 800) + 100 where id_place = {$plc->id}");
-    // v_prodpoints_players is already sorted by gtype and rnd_order so that the materials follow the Prime-Semi-Finished workflow
+    // v_prodpoints_all is already sorted by gtype and rnd_order so that the materials follow the Prime-Semi-Finished workflow
     // first manage the production of prime materials (A)
     if ($prods = $db->query("select * from v_prodpoints_all where id_place = {$plc->id} and active = 1 and gtype = 'A'")) {
         foreach($prods as $pp) {

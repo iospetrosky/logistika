@@ -1,7 +1,7 @@
 
 <?php
 $bu = config_item('base_url') . '/' . config_item('index_page');
-$ajax = $bu . "/simulator/";
+$ajax = $bu . "/simulator";
 ?>
 <script type='text/javascript'>
 //var base_url = "<?php echo $bu; ?>"
@@ -35,7 +35,7 @@ function run_local() {
         //alert($(this).val());
         $("#NEW").prop("disabled", true)
         //get the required materials from the DB
-        $.get(ajax_url + "checkprodpoint/" + $("#dd_prodpoint").val(), function(data) {
+        $.get(ajax_url + "/checkprodpoint/" + $("#dd_prodpoint").val(), function(data) {
             data = $.parseJSON(data)
             //put the result text in the message span
             $("#new_prodpoint").html(data.message)
@@ -56,10 +56,11 @@ function run_local() {
 
 <?php 
 $columns = array (
-    array("ID", 50),
-    array("Good", 120),
-    array("Active", 60),
-    array("Level", 60),
+    array("ID", 50, ""),
+    array("Good", 300, ""),
+    array("Active", 60, ""),
+    array("Level", 60, ""),
+    array("Type", 100, "RO"),
     array("", 100)
 );
 $inner = "";
@@ -81,8 +82,18 @@ if ($list) {
                 "style" => "width:" . (string)($columns[$c][1]-20) . "px"
             );
             // some fields must be rendered differently
-            if ($f == 'pptype') {
-                $html = form_dropdown($f,$pptypes,$v,$data);
+            if($columns[$c][2] == "RO") {
+                $data["disabled"] = "disabled";
+                $data["name"] = "skip_" . $data["name"]; // so we skip when saving
+            }  else {
+                $data["class"] = "editable";
+                unset($data["disabled"]);
+            }
+            if ($f == 'id_good') {
+                //print_r($item);
+                //print_r($goods); die();
+                //we must make a drop down with only the goods for this type
+                $html = form_dropdown($f,$goods[$item->pptype],$v,$data);
             } else {
                 //$data["class"] = "editable";
                 $html = form_input($data);
@@ -90,6 +101,7 @@ if ($list) {
             $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
             $c++;
         }
+        echo $inner;
     }
 }
 $inner = button("new", array("ID" => "NEW" , "class" => "act_button")) .

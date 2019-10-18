@@ -166,6 +166,7 @@ class Simulator extends CI_Controller {
     
     public function prodpoints(...$params) {
         if(sizeof($params) > 0) {
+            //print_r($params); 
             switch($params[0]) {
                 case 'new':
                     $this->simulator_model->new_production_point($params[1],
@@ -184,8 +185,14 @@ class Simulator extends CI_Controller {
         $data["place"] = $this->simulator_model->get_place_name($this->input->cookie("market_id"));
         $pptypes = $this->sets_model->get_available_prodpoints();
         $data["pptypes"] = array("0" => "Undefined");
+        $data["goods"] = array();
         foreach($pptypes as $rt) {
             $data["pptypes"][$rt->id] = $rt->pptype;
+            $data["goods"][$rt->pptype] = array();
+            $goods = $this->simulator_model->get_goods_per_prodpoint_type($rt->id);
+            foreach($goods as $gd) {
+                $data["goods"][$rt->pptype][$gd->id] = $gd->description;
+            }
         }
 
         $this->load->view('intro',$data);

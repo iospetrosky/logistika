@@ -204,7 +204,7 @@ echo "*** MAJOR SURPLUS ORDERS ***\n";
 foreach($places as $place) {
     $maj_wh = $db->query_field("select id as P1 from warehouses where player_id = {$place->major} and place_id = {$place->id}");
     $goods = $db->query("select wg.id, wg.id_good, wg.quantity, g.gname, g.plains_prices as price " .
-                        "from warehouses_goods wg" . 
+                        "from warehouses_goods wg " . 
                         "inner join goods g on wg.id_good = g.id " . 
                         "where wg.id_warehouse = $maj_wh and wg.id_good <> 1 and wg.quantity > 100");
     $order = new stdClass();
@@ -226,7 +226,7 @@ foreach($places as $place) {
 }
 
 // Stock market style loop
-echo "Stock market loop\n";
+echo "*** Stock market loop ***\n";
 foreach($places as $place) {
     /*
     For each buy order check if there's a corresponding sell order at same or

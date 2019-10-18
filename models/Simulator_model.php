@@ -6,6 +6,11 @@ class Simulator_model extends CI_Model {
     public function __construct()    {
         //$this->load->database(); // loaded by default
     }
+    
+    public function debug_sql() {
+        echo "<HR>" . $this->db->last_query();
+    }
+
     public function get_fleet_info($user_id) {
         //this used to be a selection on v_transports_locations but for strange reasons 
         //the coalesce values are trasformed in strage strings
@@ -94,6 +99,14 @@ class Simulator_model extends CI_Model {
         return $query->result()[0];
     }
     
+    public function get_goods_per_prodpoint_type($pptype) {
+        return $this->db->select("id,description")
+                        ->from("goods")
+                        ->where("pptype_req", $pptype)
+                        ->get()->result();
+    }
+    
+    
     public function get_places_whouse_player($player_id) {
         //returns the markeplaces where the player has a storage
         return $this->db->select("id_place, pname")->distinct()
@@ -158,8 +171,9 @@ class Simulator_model extends CI_Model {
     }
     
     public function get_player_prodpoints($id_player, $id_place) {
-        return $this->db->select("pp.id, pp.id_good, pp.active, pp.plevel")
+        return $this->db->select("pp.id, pp.id_good, pp.active, pp.plevel, ty.pptype")
                         ->from("productionpoints pp")
+                        ->join("prodpoint_types ty", "ty.id = pp.pptype_id")
                         ->where("id_player", $id_player)
                         ->where("id_place", $id_place)
                         ->get()->result();
