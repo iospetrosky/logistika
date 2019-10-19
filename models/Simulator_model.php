@@ -36,7 +36,6 @@ class Simulator_model extends CI_Model {
                             ->join("goods g","g.id = ppr.mat_id")
                             ->where("ppr.pp_id",$pp_id)
                             ->get();
-        //echo $this->db->last_query() . "<HR>";
         $res = $query->result();
         foreach($res as &$item) {
             //search if the player has the material
@@ -56,10 +55,39 @@ class Simulator_model extends CI_Model {
     }
     
     public function new_production_point($pp_id, $player_id, $place_id) {
+        $this->db->trans_begin();
         $this->db->set("id_player", $player_id)
                  ->set("id_place", $place_id)
                  ->set("pptype_id", $pp_id)
                  ->insert("productionpoints");
+        //consume the required materials
+        if ($materials = $this->db->select("pp_id, mat_id, quantity as req_quantity")
+                              ->from("prodpoint_reqmaterials")
+                              ->where("pp_id", $pp_id)
+                              ->get()->result()) 
+        {
+            $wh = $this->get_static_warehouse($place_id, $player_id)->id;
+            echo $wh . "<hr>";
+            foreach($materials as $mat) {
+                print_r($mat);
+                $this->db->set("quantity", "quantity - {$mat->req_quantity}")
+                         ->where("id_warehouse", $wh)
+                         ->where("id_good", $mat->mat_id)
+                         ->where("quantity > ({$mat->req_quantity} + locked)")
+                         ->update("warehouses_goods");
+                $this->debug_sql();
+                if ($this->db->affected_rows() != 1) {
+                    $this->db->trans_rollback();
+                    return -1;
+                }         
+            }                      
+        } else {
+            $this->db->trans_rollback();
+            return -2;
+        }
+        die();
+        $this->db->trans_commit();
+        return 1;
     }
     
     public function get_storage_of($id) {

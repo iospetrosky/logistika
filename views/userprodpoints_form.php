@@ -56,7 +56,7 @@ function run_local() {
 
 <?php 
 $columns = array (
-    array("ID", 50, ""),
+    array("ID", 50, "RO"),
     array("Good", 300, ""),
     array("Active", 60, ""),
     array("Level", 60, ""),
@@ -90,9 +90,6 @@ if ($list) {
                 unset($data["disabled"]);
             }
             if ($f == 'id_good') {
-                //print_r($item);
-                //print_r($goods); die();
-                //we must make a drop down with only the goods for this type
                 $html = form_dropdown($f,$goods[$item->pptype],$v,$data);
             } else {
                 //$data["class"] = "editable";
@@ -101,6 +98,9 @@ if ($list) {
             $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
             $c++;
         }
+        $but = button("save", array("ID" => "SAVE_" . $item->id, "class" => "act_button"));
+        $but.= button("del", array("ID" => "DEL_" . $item->id, "class" => "act_button"));
+        $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
         echo $inner;
     }
 }

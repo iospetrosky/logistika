@@ -175,9 +175,6 @@ class Simulator extends CI_Controller {
                     break;
             }
         }
-        
-        
-        
         // the default behaviour after the possible activities
         $data["url"] = explode("/", $this->uri->uri_string());
         $data["list"] = $this->simulator_model->get_player_prodpoints($this->input->cookie("current_id"),
@@ -188,7 +185,7 @@ class Simulator extends CI_Controller {
         $data["goods"] = array();
         foreach($pptypes as $rt) {
             $data["pptypes"][$rt->id] = $rt->pptype;
-            $data["goods"][$rt->pptype] = array();
+            $data["goods"][$rt->pptype] = array("0" => "Nothing set yet") ;
             $goods = $this->simulator_model->get_goods_per_prodpoint_type($rt->id);
             foreach($goods as $gd) {
                 $data["goods"][$rt->pptype][$gd->id] = $gd->description;
