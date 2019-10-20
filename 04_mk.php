@@ -34,6 +34,7 @@ class MarketDB extends LocalDB {
         //}
         $sql = $sql . " order by price ASC";
         //echo sprintf($sql, $id_place,$id_good,floatval($price_max)) . "\n";
+        //die(sprintf($sql, $id_place,$id_good,floatval($price_max)));
         return $this->query(sprintf($sql, $id_place,$id_good,floatval($price_max)));
     }
     
@@ -265,7 +266,7 @@ foreach($places as $place) {
                         //since buy has still a quantity, we go on with the sells
                     } else {
                         $real_quantity = $buy->quantity;
-                        $real_price = $sell->price;
+                        $real_price = $sell->price * $real_quantity;
                         if($sell->id_good != $sell->id_equiv) {
                             //the quantity actually moved must be converted in case of equivalences
                             $mult = $sell->equiv_quantity / $sell->quantity; //I avoid getting it from the DB, I just invert the formula

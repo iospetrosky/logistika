@@ -54,6 +54,14 @@ class Simulator_model extends CI_Model {
         return $res;
     }
     
+    public function save_production_point($form) {
+        //there may be a change in the goods production, which has a cost
+        //unless it's the first time
+        print_r  ($form);
+        die();
+        //$ppoint 
+    }
+    
     public function new_production_point($pp_id, $player_id, $place_id) {
         $this->db->trans_begin();
         $this->db->set("id_player", $player_id)
@@ -69,13 +77,12 @@ class Simulator_model extends CI_Model {
             $wh = $this->get_static_warehouse($place_id, $player_id)->id;
             echo $wh . "<hr>";
             foreach($materials as $mat) {
-                print_r($mat);
-                $this->db->set("quantity", "quantity - {$mat->req_quantity}")
+                //print_r($mat);
+                $this->db->set("quantity", "quantity - {$mat->req_quantity}", false)
                          ->where("id_warehouse", $wh)
                          ->where("id_good", $mat->mat_id)
-                         ->where("quantity > ({$mat->req_quantity} + locked)")
+                         ->where("quantity >","({$mat->req_quantity} + locked)", false)
                          ->update("warehouses_goods");
-                $this->debug_sql();
                 if ($this->db->affected_rows() != 1) {
                     $this->db->trans_rollback();
                     return -1;
@@ -85,7 +92,6 @@ class Simulator_model extends CI_Model {
             $this->db->trans_rollback();
             return -2;
         }
-        die();
         $this->db->trans_commit();
         return 1;
     }
@@ -152,6 +158,28 @@ class Simulator_model extends CI_Model {
         return $query->result();
     }
     
+    public function place_buy_order($id_place, $id_player, $id_good, $quantity, $price) {
+        //the order is placed as requested, the market procedure will execute or not
+        $this->db->set("id_place",$id_place)
+                 ->set("id_player",$id_player)
+                 ->set("op_type","B")
+                 ->set("id_good", $id_good)
+                 ->set("quantity", $quantity)
+                 ->set("price", $price)
+                 ->insert("marketplace");
+        return ($this->db->affected_rows() == 1);
+    }
+    
+    public function place_buy_order_from_market($form) {
+        //get the marketplace line 
+        $mktline = $this->db->select("id_place, id_player, id_good")
+                            ->from("marketplace")
+                            ->where("id",$form["id_market_item"])
+                            ->get()->result()[0];
+        $res = $this->place_buy_order($mktline->id_place, $form["current_player"], $mktline->id_good, $form["quantity"], $form["price"]);
+        return $res;
+    }
+
     public function get_available_routes($id_place) {
         //get the hexagon of the place
         $hex = $this->db->select("hexmap")->from("places")

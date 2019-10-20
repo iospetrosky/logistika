@@ -92,7 +92,7 @@ foreach($plcs as $plc) {
     $db->exec("update productionpoints set rnd_order = FLOOR(RAND() * 800) + 100 where id_place = {$plc->id}");
     // v_prodpoints_all is already sorted by gtype and rnd_order so that the materials follow the Prime-Semi-Finished workflow
     // first manage the production of prime materials (A)
-    if ($prods = $db->query("select * from v_prodpoints_all where id_place = {$plc->id} and active = 1 and gtype = 'A'")) {
+    if ($prods = $db->query("select * from v_prodpoints_all where id_place = {$plc->id} and active = 1 and gtype = 'A' and id_good <> 0")) {
         foreach($prods as $pp) {
             // keep count of the workers involved
             if ($plc->population >= $pp->workers) {

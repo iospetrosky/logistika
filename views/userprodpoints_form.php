@@ -11,11 +11,12 @@ var ajax_url = "<?php echo $ajax; ?>"
 function run_local() {
     $(".act_button").mouseup(function(e) {
         var toks = $(this).attr("ID").split("_")
-/*
+
         if (toks[0] == "SAVE") {
             //submit the form
             $("#form_" + toks[1]).submit();
         }
+/*
         if (toks[0] == "DEL") {
             //set a dedicated link
             window.location.href = base_url + "/editor/prod_wf/del/" + toks[1]
@@ -71,6 +72,9 @@ echo div($inner);
 
 if ($list) {
     foreach($list as $item) {
+        echo form_open($ajax . "/prodpoints/save",
+                        array("ID" => "form_" . $item->id),
+                        array("row_id" => $item->id));
         $c = 0;
         $inner = "";
         foreach($item as $f=>$v) {
@@ -101,7 +105,8 @@ if ($list) {
         $but = button("save", array("ID" => "SAVE_" . $item->id, "class" => "act_button"));
         $but.= button("del", array("ID" => "DEL_" . $item->id, "class" => "act_button"));
         $inner .= div($but, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
-        echo $inner;
+        echo div($inner, array("id" => "line_" . $item->id, "class" => "LINE"));
+        echo form_close();
     }
 }
 $inner = button("new", array("ID" => "NEW" , "class" => "act_button")) .

@@ -70,7 +70,6 @@ class Simulator extends CI_Controller {
         echo json_encode($json);
     }
     
-    
     public function createtransport() {
         $user_id = $this->input->cookie("current_id");
         $place_id = $this->input->cookie("market_id");
@@ -129,6 +128,13 @@ class Simulator extends CI_Controller {
         $this->load->view('market_form',$data);
     }
     
+    public function buyorder() {
+//        $user_id = $this->input->cookie("current_id");
+//        $place_id = $this->input->cookie("market_id");
+        $this->simulator_model->place_buy_order_from_market($this->input->post_get(NULL,false));
+        $this->marketplace(get_cookie("market_id"));
+    }
+    
     public function cancelorder($id_order) {
         $user_id = $this->input->cookie("current_id");
         if ($this->simulator_model->cancel_order($id_order, $user_id)) {
@@ -172,6 +178,9 @@ class Simulator extends CI_Controller {
                     $this->simulator_model->new_production_point($params[1],
                                                                  $this->input->cookie("current_id"),
                                                                  $this->input->cookie("market_id"));
+                    break;
+                case 'save': //this comes as a form
+                    $this->simulator_model->save_production_point($this->input->post_get(NULL,false));
                     break;
             }
         }
