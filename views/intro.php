@@ -184,6 +184,6 @@ if (isset($page)) {
     for($xb=1;$xb<=$page;$xb++) {
         echo button($xb, array("ID" => "NAVPAGE_" . $xb, "class" => "paginators"));
     }
-    echo button("next", array("ID" => "NAVPAGE_" . strval($xb), "class" => "paginators"));
+    if (!$last_page) echo button("next", array("ID" => "NAVPAGE_" . strval($xb), "class" => "paginators"));
 }   
 ?>

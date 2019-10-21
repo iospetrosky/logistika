@@ -47,12 +47,15 @@ class Sets_model extends CI_Model {
         return $query->result();
     }
 
-    public function goods_list() {
+    public function goods_list($page = 0, $psize = 10) {
         $query = $this->db->select("*")
                           ->from('goods')
-                          ->order_by("ID")
-                          ->get();    
-        return $query->result();
+                          ->order_by("ID");
+        if ($page > 0) {
+            $this->db->limit($psize,$psize*($page-1));
+        }
+                          
+        return $this->db->get()->result();
     }
     
     public function basic_goods() {

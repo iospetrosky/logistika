@@ -73,14 +73,23 @@ class Editor extends CI_Controller {
                 $this->editor_model->delete_good($id);
                 break;
         }
-        $data['list'] = $this->sets_model->goods_list(); 
-
+        //pagination management
+        $data["page_title"] = "Goods management"; // <<-- edit this
+        $data["cookyname"] = "PG_" . substr(md5($data["page_title"]),0,10);
+        $data["page"] = get_cookie($data["cookyname"]);
+        if (!$data["page"]) {
+            $data["page"] = 1;
+            set_cookie($data["cookyname"],1);
+        }
+	    $data['list'] = $this->sets_model->goods_list($data["page"],10);  // <<-- edit this
+        $data["last_page"] = count($data["list"])<10?true:false;
+        //end of pagination management
         $data['pptypes'] = array("0" => "Not selected");
         foreach($this->sets_model->get_prodpoint_types() as $ppt) {
             $data['pptypes'][$ppt->id] = $ppt->pptype;
         }
 
-        $this->index();
+        $this->index($data);
         $this->load->view('goods_form',$data);
     }
 
@@ -236,16 +245,17 @@ class Editor extends CI_Controller {
                 break;
         }
         //pagination management
-        $data["page_title"] = "Warehouses goods";
+        $data["page_title"] = "Warehouses goods"; // <<-- edit this
         $data["cookyname"] = "PG_" . substr(md5($data["page_title"]),0,10);
         $data["page"] = get_cookie($data["cookyname"]);
         if (!$data["page"]) {
             $data["page"] = 1;
             set_cookie($data["cookyname"],1);
         }
-        
+	    $data['list'] = $this->editor_model->warehouses_goods($data["page"],10);  // <<-- edit this
+        $data["last_page"] = count($data["list"])<10?true:false;
+        //end of pagination management
         $this->index($data);
-	    $data['list'] = $this->editor_model->warehouses_goods($data["page"],10); 
         $this->load->view('wh_goods_form',$data);
     }
     
