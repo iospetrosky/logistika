@@ -178,7 +178,14 @@ class Simulator extends CI_Controller {
                                                                  $this->input->cookie("market_id"));
                     break;
                 case 'save': //this comes as a form
-                    $this->simulator_model->save_production_point($this->input->post(NULL,false));
+                    $ret = $this->simulator_model->save_production_point($this->input->post(NULL,false));
+                    switch($ret) {
+                        case 1: $data['last_message'] = "Production point updated correctly"; break;
+                        case -1: $data['last_message'] = "No money to convert the production"; break;
+                        case -2: $data['last_message'] = "No money to upgrade to the selected level"; break;
+                        case -3: $data['last_message'] = "Error updating the production point"; break;
+                        case -4: $data['last_message'] = "You can't update the point at this state"; break;
+                    }
                     break;
             }
         }

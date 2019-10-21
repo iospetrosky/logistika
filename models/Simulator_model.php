@@ -58,6 +58,8 @@ class Simulator_model extends CI_Model {
         //there may be a change in the goods production, which has a cost
         //unless it's the first time
         $form = (object)$form;
+        if ($form->id_good == 0) return -4;
+        
         //get the current state of the production point
         $ppoint = $this->db->select("id_player, id_good, pptype_id, active, plevel")
                            ->from("productionpoints")

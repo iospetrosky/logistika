@@ -56,11 +56,15 @@ function run_local() {
 </script>
 
 <?php 
+if (isset($last_message)) {
+    echo div($last_message, array("class"=>"ret_message"));
+}
+
 $columns = array (
     array("ID", 50, "RO"),
     array("Good", 300, ""),
-    array("Active", 60, ""),
-    array("Level", 60, ""),
+    array("Active", 80, ""),
+    array("Level", 70, ""),
     array("Type", 100, "RO"),
     array("", 100)
 );
@@ -95,8 +99,9 @@ if ($list) {
             }
             if ($f == 'id_good') {
                 $html = form_dropdown($f,$goods[$item->pptype],$v,$data);
+            } elseif ($f == 'active') {
+                $html = form_dropdown($f,array(0=>'No', 1=>'Yes'),$v,$data);
             } else {
-                //$data["class"] = "editable";
                 $html = form_input($data);
             }
             $inner .= div($html, array("style" => "width:" . $columns[$c][1] . "px", "class" => "row_edit_cell"));
@@ -109,7 +114,7 @@ if ($list) {
         echo form_close();
     }
 }
-$inner = button("new", array("ID" => "NEW" , "class" => "act_button")) .
+$inner = button("new", array("ID" => "NEW" , "class" => "act_button")) . "&nbsp;&nbsp;" .
             form_dropdown('dd_prodpoint',$pptypes,'0', array("id"=>"dd_prodpoint")) . 
             span("",array("id"=>"new_prodpoint"));
 
