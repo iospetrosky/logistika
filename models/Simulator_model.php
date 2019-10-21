@@ -136,7 +136,6 @@ class Simulator_model extends CI_Model {
                     return -1;
                 }         
             }   
-            //TODO: lower the number of available production areas of the city
             $this->db->set("avail_areas","avail_areas-1",false)
                      ->where("id",$place_id)
                      ->where("avail_areas > 0")

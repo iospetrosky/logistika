@@ -173,9 +173,15 @@ class Simulator extends CI_Controller {
             //print_r($params); 
             switch($params[0]) {
                 case 'new':
-                    $this->simulator_model->new_production_point($params[1],
+                    $ret = $this->simulator_model->new_production_point($params[1],
                                                                  $this->input->cookie("current_id"),
                                                                  $this->input->cookie("market_id"));
+                    switch($ret) {
+                        case 1: $data['last_message'] = "Production point set up correctly"; break;
+                        case -1: $data['last_message'] = "Not all required materials are available"; break;
+                        case -2: $data['last_message'] = "The needed materials can't be retrieved"; break;
+                        case -3: $data['last_message'] = "The city has no more production slots"; break;
+                    }
                     break;
                 case 'save': //this comes as a form
                     $ret = $this->simulator_model->save_production_point($this->input->post(NULL,false));

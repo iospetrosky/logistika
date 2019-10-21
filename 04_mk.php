@@ -311,6 +311,7 @@ $db->exec("delete from warehouses_goods where quantity = 0 and locked = 0");
 
 if ($goods = $db->query("select * from v_major_warehouses_goods where id_good in (select id_original from equivalent where id_equiv = " . FOOD . ")")) {
     foreach($goods as $good) {
+        //check if this does actually the conversion?
         echo sprintf("Transforming %s %s to Food for %s\n",$good->avail_quantity,$good->gname,$good->fullname);
         $db->beginTransaction();
         $a = $db->exec("update warehouses_goods set quantity = quantity + {$good->avail_quantity} where id_warehouse = {$good->id_whouse} and id_good = " . FOOD);
