@@ -1,4 +1,3 @@
-
 <?php
 // this is the DATA layer. No output here!!!
 
@@ -10,17 +9,18 @@ class Editor_model extends CI_Model {
         //$this->load->database(); // autoloaded
     }
 
-    public function warehouses_goods() {
-        $sql = "select wg.id, wg.id_warehouse, g.gname, wg.quantity, wg.locked,
-                    w.capacity, w.whtype,
-                    p.pname, y.fullname
-                        from warehouses_goods wg
-                        inner join warehouses w on wg.id_warehouse = w.id
-                        inner join places p on w.place_id = p.id
-                        inner join players y on w.player_id = y.id
-                        inner join goods g on wg.id_good = g.id
-                ";
-        return $this->db->query($sql)->result();
+    public function warehouses_goods($page = 0, $psize = 10) {
+        $this->db->select("wg.id, wg.id_warehouse, g.gname, wg.quantity, wg.locked")
+                  ->select("w.capacity, w.whtype, p.pname, y.fullname")
+                  ->from("warehouses_goods wg")
+                  ->join("warehouses w","wg.id_warehouse = w.id")
+                  ->join("places p","w.place_id = p.id")
+                  ->join("players y","w.player_id = y.id")
+                  ->join("goods g","wg.id_good = g.id");
+        if ($page > 0) {
+            $this->db->limit($psize,$psize*($page-1));
+        }
+        return $this->db->get()->result();
     }  
     
     public function items_production() {

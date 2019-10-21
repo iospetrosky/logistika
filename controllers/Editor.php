@@ -14,7 +14,7 @@ class Editor extends CI_Controller {
         $this->load->model('sets_model');
     }
     
-	public function index()
+	public function index($data = array())
 	{
 	    // load all the data needed in the views in variables to be passed as second parameter
 	    
@@ -141,8 +141,6 @@ class Editor extends CI_Controller {
         $this->load->view('prodptmajors_form',$data);
     }
     
-    
-    
     public function prodpoints($action = false, $id = false)
     {   
         switch($action) {
@@ -237,9 +235,17 @@ class Editor extends CI_Controller {
                 $this->editor_model->delete_whgoods($id);
                 break;
         }
+        //pagination management
+        $data["page_title"] = "Warehouses goods";
+        $data["cookyname"] = "PG_" . substr(md5($data["page_title"]),0,10);
+        $data["page"] = get_cookie($data["cookyname"]);
+        if (!$data["page"]) {
+            $data["page"] = 1;
+            set_cookie($data["cookyname"],1);
+        }
         
-	    $data['list'] = $this->editor_model->warehouses_goods(); 
-        $this->index();
+        $this->index($data);
+	    $data['list'] = $this->editor_model->warehouses_goods($data["page"],10); 
         $this->load->view('wh_goods_form',$data);
     }
     

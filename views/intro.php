@@ -5,7 +5,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <head>
 	<meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Logistika - config</title>
+	<title>
+    <?php
+    if (isset($page_title)) {
+        echo $page_title;
+    } else {
+        echo "Logistika";
+    }
+    ?>
+    </title>
 
 <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script-->
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -29,7 +37,6 @@ function ShowAlert(atext, atitle = 'Warning', afooter = '', redir = '') {
 $(document).ready(function () {
     // do global stuff
     $("input").attr("autocomplete", "off"); // no autocomplete on every page
-    
 
     $(".close, .modal").click(function() {
         $("#myModal").fadeOut(200)
@@ -41,6 +48,19 @@ $(document).ready(function () {
     if(typeof(run_local) == typeof(Function)) {
         run_local() // must be defined in the subsequent views
     }
+<?php
+// Pagination plugin
+if ((isset($page)) && (isset($page_title))) : 
+?>
+    //manage of the pagination buttons (if they exist)
+    $(".paginators").click(function() {
+        //ID = NAVPAGE_number
+        var toks = $(this).attr("ID").split("_")
+        setCookie("<?php echo $cookyname; ?>", toks[1],1);
+        window.location.replace("<?php echo current_url(); ?>")
+    })
+<?php endif; ?>    
+    
 })
 </script>
 <?php
@@ -157,5 +177,13 @@ endif;
 ?>
 </div>
 
-
-
+<?php
+// Pagination plugin
+if (isset($page)) {
+    //it means all the other stuff is set also
+    for($xb=1;$xb<=$page;$xb++) {
+        echo button($xb, array("ID" => "NAVPAGE_" . $xb, "class" => "paginators"));
+    }
+    echo button("next", array("ID" => "NAVPAGE_" . strval($xb), "class" => "paginators"));
+}   
+?>
