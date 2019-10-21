@@ -57,9 +57,57 @@ class Simulator_model extends CI_Model {
     public function save_production_point($form) {
         //there may be a change in the goods production, which has a cost
         //unless it's the first time
-        print_r  ($form);
-        die();
-        //$ppoint 
+        $form = (object)$form;
+        //get the current state of the production point
+        $ppoint = $this->db->select("id_player, id_good, pptype_id, active, plevel")
+                           ->from("productionpoints")
+                           ->where("id",$form->row_id)
+                           ->get()->result()[0];
+        //get the production point info
+        $ppcost = $this->db->select("conv_cost as cost")
+                           ->from("prodpoint_types")
+                           ->where("id", $ppoint->pptype_id)
+                           ->get()->result()[0]->cost;
+        
+        $this->db->trans_begin();
+        if (($ppoint->id_good != $form->id_good) && ($ppoint->id_good != 0)) {
+            //pay the conversion if changing the production 
+            $cost = $ppcost * $ppoint->plevel;
+            $this->db->set("gold","gold - $cost",false)
+                     ->where("id", $ppoint->id_player)
+                     ->where("gold >", $cost)
+                     ->update("players");
+            if ($this->db->affected_rows() != 1) {
+                $this->db->trans_rollback();
+                return -1;
+            }         
+        }
+        $ppoint->id_good = $form->id_good;
+        
+        if ($ppoint->plevel < $form->plevel) {
+            //pay the cost of the increased level
+            $cost = $ppcost * ($form->plevel - $ppoint->plevel);
+            $this->db->set("gold","gold - $cost",false)
+                     ->where("id", $ppoint->id_player)
+                     ->where("gold >", $cost)
+                     ->update("players");
+            if ($this->db->affected_rows() != 1) {
+                $this->db->trans_rollback();
+                return -2;
+            }         
+        }
+        $ppoint->plevel = $form->plevel;
+        
+        $ppoint->active = $form->active;
+        unset($ppoint->id_player); unset($ppoint->pptype_id);
+        $this->db->where("id", $form->row_id)
+                 ->update("productionpoints", $ppoint);
+        if ($this->db->affected_rows() != 1) {
+            $this->db->trans_rollback();
+            return -3;
+        }         
+        $this->db->trans_commit();
+        return 1;
     }
     
     public function new_production_point($pp_id, $player_id, $place_id) {
@@ -75,9 +123,7 @@ class Simulator_model extends CI_Model {
                               ->get()->result()) 
         {
             $wh = $this->get_static_warehouse($place_id, $player_id)->id;
-            echo $wh . "<hr>";
             foreach($materials as $mat) {
-                //print_r($mat);
                 $this->db->set("quantity", "quantity - {$mat->req_quantity}", false)
                          ->where("id_warehouse", $wh)
                          ->where("id_good", $mat->mat_id)
@@ -87,7 +133,16 @@ class Simulator_model extends CI_Model {
                     $this->db->trans_rollback();
                     return -1;
                 }         
-            }                      
+            }   
+            //TODO: lower the number of available production areas of the city
+            $this->db->set("avail_areas","avail_areas-1",false)
+                     ->where("id",$place_id)
+                     ->where("avail_areas > 0")
+                     ->update("places");
+            if ($this->db->affected_rows() != 1) {
+                $this->db->trans_rollback();
+                return -3;
+            }         
         } else {
             $this->db->trans_rollback();
             return -2;
