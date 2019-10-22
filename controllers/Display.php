@@ -14,9 +14,6 @@ class Display extends CI_Controller {
     
     public function index($data = false)
     {
-        // load all the data needed in the views in variables to be passed as second parameter
-        //$data['tile_sets'] = $this->display_model->some_method(); 
-
         $data["url"] = explode("/", $this->uri->uri_string());
         $this->load->view('intro',$data);
     }

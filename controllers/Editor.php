@@ -16,9 +16,11 @@ class Editor extends CI_Controller {
     
 	public function index($data = array())
 	{
-	    // load all the data needed in the views in variables to be passed as second parameter
-	    
         $data["url"] = explode("/", $this->uri->uri_string());
+        //used to build the URL without the parameters sent to the functions
+        $data["naked_url"] = config_item('index_page_url') . "/" . $data["url"][0];
+        if (isset($data['url'][1])) $data["naked_url"] .= "/" . $data["url"][1];
+        
         $this->load->view('intro',$data);
 	}
     

@@ -57,7 +57,7 @@ if ((isset($page)) && (isset($page_title))) :
         //ID = NAVPAGE_number
         var toks = $(this).attr("ID").split("_")
         setCookie("<?php echo $cookyname; ?>", toks[1],1);
-        window.location.replace("<?php echo current_url(); ?>")
+        window.location.replace("<?php echo $naked_url; ?>")
     })
 <?php endif; ?>    
     

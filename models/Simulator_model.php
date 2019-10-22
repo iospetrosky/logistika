@@ -101,7 +101,7 @@ class Simulator_model extends CI_Model {
         $ppoint->plevel = $form->plevel;
         
         $ppoint->active = $form->active;
-        unset($ppoint->id_player); unset($ppoint->pptype_id);
+        unset($ppoint->id_player, $ppoint->pptype_id);
         $this->db->where("id", $form->row_id)
                  ->update("productionpoints", $ppoint);
         if ($this->db->affected_rows() != 1) {

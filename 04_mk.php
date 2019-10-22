@@ -310,11 +310,17 @@ $db->exec("delete from marketplace where quantity = 0");
 $db->exec("delete from warehouses_goods where quantity = 0 and locked = 0"); 
 
 if ($goods = $db->query("select * from v_major_warehouses_goods where id_good in (select id_original from equivalent where id_equiv = " . FOOD . ")")) {
+    //retrieve the equivalent table as an associative array
+    $eqiv_tab = $db->query("select id_original, quantity from equivalent where id_equiv = " . FOOD);
+    $equiv = array();
+    foreach($eqiv_tab as $item) {
+        $equiv[$item->id_original] = $item->quantity;
+    }
     foreach($goods as $good) {
-        //check if this does actually the conversion?
-        echo sprintf("Transforming %s %s to Food for %s\n",$good->avail_quantity,$good->gname,$good->fullname);
+        $transformed = $equiv[$good->id_good] * $good->avail_quantity;
+        echo sprintf("Transforming %s %s to %s Food for %s\n", $good->avail_quantity, $good->gname, $transformed, $good->fullname);
         $db->beginTransaction();
-        $a = $db->exec("update warehouses_goods set quantity = quantity + {$good->avail_quantity} where id_warehouse = {$good->id_whouse} and id_good = " . FOOD);
+        $a = $db->exec("update warehouses_goods set quantity = quantity + {$transformed} where id_warehouse = {$good->id_whouse} and id_good = " . FOOD);
         $b = $db->exec("delete from warehouses_goods where id_warehouse = {$good->id_whouse} and id_good = $good->id_good");
         if ($a + $b == 2) {
             $db->commit();

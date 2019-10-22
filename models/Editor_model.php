@@ -69,11 +69,23 @@ class Editor_model extends CI_Model {
         $this->save_data("goods",$data);
     }
     public function new_good() {
-        $this->new_data("goods","gname","NO GOOD");
+        $this->db->trans_start();
+        $gid = $this->new_data("goods","gname","NO GOOD");
+        echo $gid;
+        // goods are by default equivalent to themselves
+        $this->db->set("id_original",$gid)
+                 ->set("id_equiv", $gid)
+                 ->set("quantity", "1")
+                 ->insert("equivalent");
+        $this->db->trans_commit();         
     }
     public function delete_good($id) {
         if ($id == 0) return;
+        $this->db->trans_start();
         $this->delete_data("goods", $id);
+        $this->delete_data("equivalent", $id, "id_original");
+        $this->db->trans_commit(); 
+        //delete also the equivalent
     }
 
     //************************************************************************
@@ -165,17 +177,20 @@ class Editor_model extends CI_Model {
     private function new_data($table, $main_field, $def_value) {
         $this->db->set($main_field,$def_value);
         $this->db->insert($table);
+        return $this->db->insert_id();
     }
     private function delete_data($table, $key_val, $key_field = "id") {
         $this->db->where($key_field,$key_val);
         $this->db->delete($table);
+        return $this->db->affected_rows();
     }
     private function save_data($table, $data) {
-        //$DATA must have a row_id fields that maps with the ID field of a table
+        //$DATA must have a row_id field that maps with the ID field of a table
         //this because we can also edit the ID in some cases
         $this->db->where('id',$data['row_id']);
         unset($data["row_id"]);
         $this->db->update($table,$data);
+        return $this->db->affected_rows();
     }
     
     

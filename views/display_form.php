@@ -4,9 +4,7 @@ $bu = config_item('base_url') . '/' . config_item('index_page');
 $ajax = $bu . "/xxx/";
 ?>
 <script type='text/javascript'>
-var base_url = "<?php echo $bu; ?>"
 var ajax_url = "<?php echo $ajax; ?>" 
-
 
 function run_local() {
     $(".head_display_cell").click(function(e){
@@ -15,14 +13,8 @@ function run_local() {
             Nav("<?php echo $bu . "/" . $url[0] . "/" . $url[1];?>/" + $(this).attr("id") + "/" + value)
         }
     })
-
-            
 } // run_local    
-    
 </script>
-
-
-
 
 <?php
 if ($list) {
